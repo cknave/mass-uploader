@@ -213,14 +213,7 @@ namespace Utils
         }
 
         public NWebClient(int timeout) : this(timeout, false) {
-         
-
-            //System.Net.ServicePointManager.Expect100Continue = true;
             System.Net.ServicePointManager.MaxServicePointIdleTime = 20000;
-            //System.Net.ServicePointManager.UseNagleAlgorithm = true;
-            //System.Net.ServicePointManager.DefaultConnectionLimit = 100;
-            
-            //System.Net.ServicePointManager.MaxServicePoints = 10000;
         }
 
 
@@ -232,14 +225,9 @@ namespace Utils
             f_AutoReferer = autoReferer;
             f_Timeout = timeout;
             f_CookieContainer = new CookieContainer();
-
-            //System.Net.ServicePointManager.Expect100Continue = true;
             System.Net.ServicePointManager.MaxServicePointIdleTime = 20000;
-            //System.Net.ServicePointManager.UseNagleAlgorithm = true;
-            //System.Net.ServicePointManager.DefaultConnectionLimit = 100;
         }
 
-        // ALLTE 
         public NWebClient(string proxyAddress, int proxyPort, int timeout) {
             try {
                 f_WebProxy = new WebProxy(proxyAddress, proxyPort);
@@ -708,7 +696,7 @@ namespace Utils
                     f_HttpWebRequest.Proxy = f_WebProxy;
                 }
                 f_HttpWebRequest.Method = "POST";
-                f_HttpWebRequest.ContentType = "text/xml";////FETTeli ALLTEEEEErier isch doch guet so oder?nei nid? demm mömmer proxy und so zweimal baschtle AH STIMMT JO NEGERsteamT joh balls id webclient wickle (NOD) NAAT
+                f_HttpWebRequest.ContentType = "text/xml";
                 f_HttpWebRequest.Timeout = 3000;
                 AddXmlToRequest(f_HttpWebRequest, name, url);
                 f_HttpWebRequest.GetResponse();
