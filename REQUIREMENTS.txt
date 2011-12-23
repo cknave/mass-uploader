@@ -1,0 +1,10 @@
+First of all, to run it you need windows or wine. I don't think it will run with mono, because of the win32 BASS integration.
+To run this tool you need to have the latest version of the .NET Framework 4 installed
+Get it from here, if you can't start the tool: http://www.microsoft.com/download/en/details.aspx?id=17718
+
+The tool makes use of the dynamic feature that comes with .net 4.0. 
+A GTK based linux/mac port is on its way, but first i will get the windows version done.
+
+If you run into troubles, don't hesitate to contact me through gtalk/g+/email: ramonott@gmail.com for a fast response.
+
+
