@@ -59,6 +59,27 @@ namespace RadioPusher2
                 dataGridViewTracks.ClearSelection();
                 var hti = dataGridViewTracks.HitTest(e.X, e.Y);
                 dataGridViewTracks.Rows[hti.RowIndex].Selected = true;
+                if (e.Button == MouseButtons.Right)
+                {
+                    if (hti.ColumnIndex == 1){ //artist row clicked
+                        if (ds[hti.RowIndex].ArtistID == 0)
+                        {
+                            SearchForm sf = new SearchForm(String.Format("{0}search/ajax/artist/?q=", config.hostname.Replace("/demovibes/", "/")), ds[hti.RowIndex].ID3Artist, "id", "handle");
+                            sf.ShowDialog(); try
+                            {
+                                ds[hti.RowIndex].ArtistID = Int32.Parse(sf.ResultKey);
+                            }
+                            catch {
+                                ds[hti.RowIndex].ArtistID = 0;
+                            }
+                        }
+                        else
+                        {
+
+                            contextMenuStripArtistSearch.Show(new Point(MousePosition.X, MousePosition.Y));
+                        }
+                    }
+                }
             }
 
         }
@@ -175,7 +196,6 @@ namespace RadioPusher2
             ArtistID.Visible = true;
             ArtistID.Name = "ArtistID";
             ArtistID.Width = 50;
-            ArtistID.ContextMenuStrip = contextMenuStripArtistSearch;
 
 
             DataGridViewTextBoxColumn ID3Artist = new DataGridViewTextBoxColumn();
@@ -302,70 +322,45 @@ namespace RadioPusher2
 
         }
 
+
         private void contextMenuStripArtistSearch_Opened(object sender, EventArgs e)
         {
 
-
             try{
+                
                 int rowIndex = dataGridViewTracks.SelectedCells[0].RowIndex;
-                contextMenuStripArtistSearch.Items[0].Text = ds[rowIndex].ID3Artist;
-                if(contextMenuStripArtistSearch.Items[0].Text.Trim().Equals("")){
-                    return;
-                }
-                if (ds[rowIndex].ArtistID == 0)
-                {
-                    //lookup time :)
 
-                    JavaScriptSerializer jss = new JavaScriptSerializer();
-                    jss.RegisterConverters(new JavaScriptConverter[] { new DynamicJsonConverter() });
-                    NWebClient cw = new NWebClient(15000);
-                    string json = cw.DownloadString(String.Format("{0}search/ajax/artist/?q={1}", config.hostname.Replace("/demovibes/", "/"), contextMenuStripArtistSearch.Items[0].Text));
-                    dynamic artists = jss.Deserialize(json, typeof(object)) as dynamic;
-
-                    //write a new contextmenu
-                  //  contextMenuStripArtistSearch = new System.Windows.Forms.ContextMenuStrip();
-                    contextMenuStripArtistSearch.Items.Clear();
-                    contextMenuStripArtistSearch.Items.Add(toolStripTextBoxQuery);
-                    contextMenuStripArtistSearch.Items.Add(toolStripSeparator1);                    
-                    
-                    foreach(var artist in artists.artists){
-               //         Console.WriteLine(artist["id"]);
-
-                        ToolStripMenuItem itm = new ToolStripMenuItem();
-                        itm.Text = artist["handle"];
-                        itm.Name = artist["id"].ToString();
-                        itm.Tag = rowIndex;
-                        itm.Click += new EventHandler(delegate
-                        {
-                            ds[(int)itm.Tag].ArtistID = Int32.Parse(itm.Name);
-                            dataGridViewTracks.Refresh();
-                        });
-                        contextMenuStripArtistSearch.Items.Add(itm);
+                contextMenuStripArtistSearch.Visible = true;
+                contextMenuStripArtistSearch.Items.Clear();
+                ToolStripMenuItem itm = new ToolStripMenuItem();
+                itm.Text = "Copy to all fields in this row";                    
+                itm.Tag = rowIndex;
+                itm.Click += new EventHandler(delegate{
+                    int aid = ds[rowIndex].ArtistID;
+                    for(int i=0;i<ds.Count;i++){
+                        ds[i].ArtistID = aid;
                     }
-                 //   Console.WriteLine("artists.glossary.title: " + artists);
-                    //Console.WriteLine("glossaryEntry.glossary.GlossDiv.title: " + glossaryEntry.glossary.GlossDiv.title);
-
-                    
-                }
-                else
-                {
-                    contextMenuStripArtistSearch.Items.Clear();
-                    ToolStripMenuItem itm = new ToolStripMenuItem();
-                    itm.Text = "Copy to all fields in this column";                    
-                    itm.Tag = rowIndex;
-                    itm.Click += new EventHandler(delegate{
-                        int aid = ds[rowIndex].ArtistID;
-                        for(int i=0;i<ds.Count;i++){
-                            ds[i].ArtistID = aid;
-                        }
-                        dataGridViewTracks.Refresh();
-                    });
-                    contextMenuStripArtistSearch.Items.Add(itm);
-                }
+                    dataGridViewTracks.Refresh();
+                });
+                contextMenuStripArtistSearch.Items.Add(itm);
+                ToolStripMenuItem itm2 = new ToolStripMenuItem();
+                itm2.Text = "Copy to all fields in this column below this field";
+                itm2.Tag = rowIndex;
+                itm2.Click += new EventHandler(delegate{
+                    int aid = ds[rowIndex].ArtistID;
+                    for (int i = rowIndex; i < ds.Count; i++)
+                    {
+                        ds[i].ArtistID = aid;
+                    }
+                    dataGridViewTracks.Refresh();
+                });
+                contextMenuStripArtistSearch.Items.Add(itm2);
+                
             }catch(Exception ee){
                 Console.WriteLine(ee.Message);
             }
         }
+
 
         private void button4_Click(object sender, EventArgs e)
         {
@@ -502,6 +497,55 @@ namespace RadioPusher2
         {
             StopMusic();
 
+        }
+
+        private void statusStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+
+        }
+
+        private void dataGridViewTracks_DragDrop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                //GOT FILEZ! 
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);                
+                List<string> filetypes = new List<string>();
+                filetypes.Add(".s3m");
+                filetypes.Add(".xm");
+                filetypes.Add(".it");
+                filetypes.Add(".mp3");
+                filetypes.Add(".mp4");
+                filetypes.Add(".m4a");
+                filetypes.Add(".ogg");
+                filetypes.Add(".mod");
+                filetypes.Add(".mtm");
+                filetypes.Add(".umx");
+                filetypes.Add(".it");
+                foreach (string filename in files)
+                {
+                    FileInfo f = new FileInfo(filename);
+                    bool match = false;
+                    foreach (string ft in filetypes) {
+                        if (ft.Equals(f.Extension)){
+                            match = true;
+                        }
+                    }
+                    if (match)
+                    {
+                        ds.Add(new Track(filename));
+                    }
+
+                }
+            }
+        }
+
+        private void dataGridViewTracks_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effect = DragDropEffects.Move;
+            }
         }
 
     }

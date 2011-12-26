@@ -169,6 +169,7 @@
             // 
             // dataGridViewTracks
             // 
+            this.dataGridViewTracks.AllowDrop = true;
             this.dataGridViewTracks.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
@@ -177,6 +178,8 @@
             this.dataGridViewTracks.Name = "dataGridViewTracks";
             this.dataGridViewTracks.Size = new System.Drawing.Size(941, 270);
             this.dataGridViewTracks.TabIndex = 0;
+            this.dataGridViewTracks.DragDrop += new System.Windows.Forms.DragEventHandler(this.dataGridViewTracks_DragDrop);
+            this.dataGridViewTracks.DragEnter += new System.Windows.Forms.DragEventHandler(this.dataGridViewTracks_DragEnter);
             // 
             // statusStrip1
             // 
@@ -187,6 +190,7 @@
             this.statusStrip1.Size = new System.Drawing.Size(1068, 22);
             this.statusStrip1.TabIndex = 1;
             this.statusStrip1.Text = "statusStrip1";
+            this.statusStrip1.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.statusStrip1_ItemClicked);
             // 
             // toolStripStatusLabel1
             // 
