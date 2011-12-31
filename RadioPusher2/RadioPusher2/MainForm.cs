@@ -344,7 +344,7 @@ namespace RadioPusher2
                 });
                 contextMenuStripArtistSearch.Items.Add(itm);
                 ToolStripMenuItem itm2 = new ToolStripMenuItem();
-                itm2.Text = "Copy to all fields in this column below this field";
+                itm2.Text = "Copy to all rows in this column below this field";
                 itm2.Tag = rowIndex;
                 itm2.Click += new EventHandler(delegate{
                     int aid = ds[rowIndex].ArtistID;
