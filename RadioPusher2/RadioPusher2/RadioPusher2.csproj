@@ -57,6 +57,9 @@
       <HintPath>.\Bass.Net.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="RadioPusher2, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <ExecutableExtension>.exe</ExecutableExtension>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -97,9 +100,13 @@
     <Compile Include="SearchForm.Designer.cs">
       <DependentUpon>SearchForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Utils\NRichTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Utils\NWebClient.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Utils\TextBoxStreamWriter.cs" />
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
       <SubType>Designer</SubType>

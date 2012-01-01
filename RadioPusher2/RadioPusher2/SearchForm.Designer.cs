@@ -73,7 +73,7 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.textBoxSearch);
             this.Name = "SearchForm";
-            this.Text = "SearchForm";
+            this.Text = "Search";
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewSearch)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

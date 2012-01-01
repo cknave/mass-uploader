@@ -27,101 +27,146 @@ namespace RadioPusher2
         BindingList<Track> ds = new BindingList<Track>();
         int handle = 0;
         int current_track_in_upload_queue = 0;
+        TextWriter _writer = null;
+
         public MainForm()
         {
             InitializeComponent();
             //Load the settings
-            config.loadconfig();
-            trackBarVolume.Minimum = 1;
-            trackBarVolume.Maximum = 100;
+            _writer = new TextBoxStreamWriter(textboxDebug);
+            // Redirect the out Console stream
+            Console.SetOut(_writer);
+            Console.WriteLine("Output Console Activated");
 
-            //configure the grid
-            ConfigureGrid();
 
-            dataGridViewTracks.CellClick += new DataGridViewCellEventHandler(dataGridViewTracks_CellClick); //assign an event to the grid
-            dataGridViewTracks.MouseDown += new MouseEventHandler(dataGridViewTracks_MouseDown);
-            Bass.BASS_Init(-1, 44100, BASSInit.BASS_DEVICE_DEFAULT, System.IntPtr.Zero); //init bass
             try
             {
+                config.loadconfig();
+                trackBarVolume.Minimum = 1;
+                trackBarVolume.Maximum = 100;
+
+                //configure the grid
+                ConfigureGrid();
+
+                dataGridViewTracks.CellClick += new DataGridViewCellEventHandler(dataGridViewTracks_CellClick); //assign an event to the grid
+                dataGridViewTracks.MouseDown += new MouseEventHandler(dataGridViewTracks_MouseDown);
+                Bass.BASS_Init(-1, 44100, BASSInit.BASS_DEVICE_DEFAULT, System.IntPtr.Zero); //init bass
                 trackBarVolume.Value = (int)(Bass.BASS_GetVolume() * 100); //get the current volume
             }
-            catch
+            catch(Exception exp)
             {
+                Console.WriteLine("Exception: " + exp.Message);
             }
+
+
+
         }
 
         void dataGridViewTracks_MouseDown(object sender, MouseEventArgs e)
         {
-            //windows is pretty damn retarded sometimes ;)
-            //this is a hack (tm)
-            if (e.Button == MouseButtons.Right)
+            try
             {
-                dataGridViewTracks.ClearSelection();
-                var hti = dataGridViewTracks.HitTest(e.X, e.Y);
-                dataGridViewTracks.Rows[hti.RowIndex].Selected = true;
+                //windows is pretty damn retarded sometimes ;)
+                //this is a hack (tm)
                 if (e.Button == MouseButtons.Right)
                 {
-                    if (hti.ColumnIndex == 1){ //artist row clicked
-                        if (ds[hti.RowIndex].ArtistID == 0)
-                        {
-                            SearchForm sf = new SearchForm(String.Format("{0}search/ajax/artist/?q=", config.hostname.Replace("/demovibes/", "/")), ds[hti.RowIndex].ID3Artist, "id", "handle");
-                            sf.ShowDialog(); try
+                    dataGridViewTracks.ClearSelection();
+                    var hti = dataGridViewTracks.HitTest(e.X, e.Y);
+                    dataGridViewTracks.Rows[hti.RowIndex].Selected = true;
+                    if (e.Button == MouseButtons.Right)
+                    {
+                        if (hti.ColumnIndex == 1)
+                        { //artist row clicked
+                            if (ds[hti.RowIndex].ArtistID == 0)
                             {
-                                ds[hti.RowIndex].ArtistID = Int32.Parse(sf.ResultKey);
+                                SearchForm sf = new SearchForm(String.Format("{0}search/ajax/artist/?q=", config.hostname.Replace("/demovibes/", "/")), ds[hti.RowIndex].ID3Artist, "id", "handle");
+                                sf.ShowDialog(); try
+                                {
+                                    ds[hti.RowIndex].ArtistID = Int32.Parse(sf.ResultKey);
+                                }
+                                catch
+                                {
+                                    ds[hti.RowIndex].ArtistID = 0;
+                                }
                             }
-                            catch {
-                                ds[hti.RowIndex].ArtistID = 0;
+                            else
+                            {
+                                contextMenuStripArtistSearch.Show(new Point(MousePosition.X, MousePosition.Y));
                             }
-                        }
-                        else
-                        {
-
-                            contextMenuStripArtistSearch.Show(new Point(MousePosition.X, MousePosition.Y));
                         }
                     }
                 }
+            }
+            catch (Exception exp)
+            {
+                Console.WriteLine("Exception: " + exp.Message);
             }
 
         }
 
         void dataGridViewTracks_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            Console.WriteLine(e.ColumnIndex);
-            Console.WriteLine(e.RowIndex);
             //column -1 is the |> column, use it as play button.
+           try{
             if (e.ColumnIndex == -1){
-                try{
+                
                     PlayMusic(ds[e.RowIndex].File);
-                }catch{}
             }
+           }
+           catch (Exception exp) { Console.WriteLine("Exception: " + exp.Message); }
+
         }
 
         private void PlayMusic(string filename)
         {
-            //some bass code to play the track
-            Bass.BASS_ChannelStop(handle);
+            try
+            {
+                //some bass code to play the track
+                Bass.BASS_ChannelStop(handle);
 
-            //for mp3 and ogg use special settings
-            if (filename.ToLower().Contains(".mp3") || filename.ToLower().Contains(".ogg")){
-                handle = Bass.BASS_StreamCreateFile(filename, 0, 0, BASSFlag.BASS_DEFAULT);
-            }else{
-                //this is for mods,xm,s3m.. you know.. formats for real men.
-                handle = Bass.BASS_MusicLoad(filename, 0, 0, BASSFlag.BASS_DEFAULT, 44100);
+                //for mp3 and ogg use special settings
+                if (filename.ToLower().Contains(".mp3") || filename.ToLower().Contains(".ogg"))
+                {
+                    handle = Bass.BASS_StreamCreateFile(filename, 0, 0, BASSFlag.BASS_DEFAULT);
+                }
+                else
+                {
+                    //this is for mods,xm,s3m.. you know.. formats for real men.
+                    handle = Bass.BASS_MusicLoad(filename, 0, 0, BASSFlag.BASS_DEFAULT, 44100);
+                }
+                Bass.BASS_ChannelPlay(handle, true);
             }
-            Bass.BASS_ChannelPlay(handle, true);
+            catch (Exception exp)
+            {
+                Console.WriteLine("Exception: " + exp.Message);
+            }
         }
 
         private void StopMusic()
         {
-            Bass.BASS_ChannelStop(handle);
+            try
+            {
+                Bass.BASS_ChannelStop(handle);
+            }
+            catch (Exception exp)
+            {
+                Console.WriteLine("Exception: " + exp.Message);
+            }
         }
 
         private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            //show the settings form
-            SettingsForm sf = new SettingsForm();
-            sf.ShowDialog();
-            config.loadconfig();
+            try
+            {
+                //show the settings form
+                SettingsForm sf = new SettingsForm();
+                sf.ShowDialog();
+                config.loadconfig();
+            }
+            catch (Exception exp)
+            {
+                Console.WriteLine("Exception: " + exp.Message);
+            }
         }
 
         private void buttonAddTracks_Click(object sender, EventArgs e)
@@ -145,181 +190,210 @@ namespace RadioPusher2
 
         void ofp_FileOk(object sender, CancelEventArgs e)
         {
-            //add the files to the grid
-            //checkout Track.cs - because that's where the tagging magic happens
-            OpenFileDialog ofp = (OpenFileDialog)sender;
-            foreach (string filename in ofp.FileNames)
+            try
             {
-                ds.Add(new Track(filename));
-                
+                //add the files to the grid
+                //checkout Track.cs - because that's where the tagging magic happens
+                OpenFileDialog ofp = (OpenFileDialog)sender;
+                foreach (string filename in ofp.FileNames)
+                {
+                    ds.Add(new Track(filename));
+
+                }
+            }
+            catch (Exception exp)
+            {
+                Console.WriteLine("Exception: " + exp.Message);
             }
         }
 
         private void trackBarVolume_ValueChanged(object sender, EventArgs e)
         {
-            //change the volume.. sometimes stuff can be very loud :(
-            float vol = (float)trackBarVolume.Value/100;
-            Bass.BASS_SetVolume(vol);
+            try
+            {
+                //change the volume.. sometimes stuff can be very loud :(
+                float vol = (float)trackBarVolume.Value / 100;
+                Bass.BASS_SetVolume(vol);
+            }
+            catch (Exception exp)
+            {
+                Console.WriteLine("Exception: " + exp.Message);
+            }
         }
 
         private void buttonLookupArtist_Click(object sender, EventArgs e)
         {
-            //lookup artist code
-
-            //basic error check
-            if(ds.Count==0){
-                MessageBox.Show("Add some Tracks first");
-                return;
-            }
-
-            BindingList<Track> copy = new BindingList<Track>(ds);
-            int it = 0;
-            foreach (Track track in copy)
+            try
             {
-                if (track.ArtistID == 0){
-                   //lookup time :)
-                    NWebClient cw = new NWebClient(15000);
-                    string json = cw.DownloadString(String.Format("{0}search/ajax/artist/?q={1}",config.hostname,null));
+                //lookup artist code
+
+                //basic error check
+                if (ds.Count == 0)
+                {
+                    MessageBox.Show("Add some Tracks first");
+                    return;
                 }
-                it++; 
+
+                BindingList<Track> copy = new BindingList<Track>(ds);
+                int it = 0;
+                foreach (Track track in copy)
+                {
+                    if (track.ArtistID == 0)
+                    {
+                        //lookup time :)
+                        NWebClient cw = new NWebClient(15000);
+                        string json = cw.DownloadString(String.Format("{0}search/ajax/artist/?q={1}", config.hostname, null));
+                    }
+                    it++;
+                }
+            }
+            catch (Exception exp)
+            {
+                Console.WriteLine("Exception: " + exp.Message);
             }
         }
 
         private void ConfigureGrid()
         {
-            dataGridViewTracks.AutoGenerateColumns = false;
-            
-
-            DataGridViewTextBoxColumn ArtistID = new DataGridViewTextBoxColumn();
-            ArtistID.DataPropertyName = "ArtistID";
-            ArtistID.HeaderText = "ArtistID";
-            ArtistID.Visible = true;
-            ArtistID.Name = "ArtistID";
-            ArtistID.Width = 50;
+            try
+            {
+                dataGridViewTracks.AutoGenerateColumns = false;
 
 
-            DataGridViewTextBoxColumn ID3Artist = new DataGridViewTextBoxColumn();
-            ID3Artist.DataPropertyName = "ID3Artist";
-            ID3Artist.HeaderText = "ID3Artist";
-            ID3Artist.Visible = false;
-            ID3Artist.Name = "ID3Artist";
+                DataGridViewTextBoxColumn ArtistID = new DataGridViewTextBoxColumn();
+                ArtistID.DataPropertyName = "ArtistID";
+                ArtistID.HeaderText = "ArtistID";
+                ArtistID.Visible = true;
+                ArtistID.Name = "ArtistID";
+                ArtistID.Width = 50;
 
-            DataGridViewTextBoxColumn File = new DataGridViewTextBoxColumn();
-            File.DataPropertyName = "File";
-            File.HeaderText = "File";
-            File.Visible = true;
-            File.Name = "File";
-            File.ReadOnly = true;
-            File.Width = 100;
 
-            DataGridViewTextBoxColumn SongName = new DataGridViewTextBoxColumn();
-            SongName.DataPropertyName = "SongName";
-            SongName.HeaderText = "SongName";
-            SongName.Visible = true;
-            SongName.Name = "SongName";
+                DataGridViewTextBoxColumn ID3Artist = new DataGridViewTextBoxColumn();
+                ID3Artist.DataPropertyName = "ID3Artist";
+                ID3Artist.HeaderText = "ID3Artist";
+                ID3Artist.Visible = false;
+                ID3Artist.Name = "ID3Artist";
 
-            DataGridViewTextBoxColumn ReleaseYear = new DataGridViewTextBoxColumn();
-            ReleaseYear.DataPropertyName = "ReleaseYear";
-            ReleaseYear.HeaderText = "ReleaseYear";
-            ReleaseYear.Visible = true;
-            ReleaseYear.Name = "ReleaseYear";
-            ReleaseYear.Width = 70;
+                DataGridViewTextBoxColumn File = new DataGridViewTextBoxColumn();
+                File.DataPropertyName = "File";
+                File.HeaderText = "File";
+                File.Visible = true;
+                File.Name = "File";
+                File.ReadOnly = true;
+                File.Width = 100;
 
-            DataGridViewTextBoxColumn MixSongID = new DataGridViewTextBoxColumn();
-            MixSongID.DataPropertyName = "MixSongID";
-            MixSongID.HeaderText = "MixSongID";
-            MixSongID.Visible = true;
-            MixSongID.Name = "MixSongID";
-            MixSongID.Width = 60;
+                DataGridViewTextBoxColumn SongName = new DataGridViewTextBoxColumn();
+                SongName.DataPropertyName = "SongName";
+                SongName.HeaderText = "SongName";
+                SongName.Visible = true;
+                SongName.Name = "SongName";
 
-            DataGridViewTextBoxColumn GroupsID = new DataGridViewTextBoxColumn();
-            GroupsID.DataPropertyName = "GroupsID";
-            GroupsID.HeaderText = "GroupsID";
-            GroupsID.Visible = true;
-            GroupsID.Name = "GroupsID";
-            GroupsID.Width = 63;
+                DataGridViewTextBoxColumn ReleaseYear = new DataGridViewTextBoxColumn();
+                ReleaseYear.DataPropertyName = "ReleaseYear";
+                ReleaseYear.HeaderText = "ReleaseYear";
+                ReleaseYear.Visible = true;
+                ReleaseYear.Name = "ReleaseYear";
+                ReleaseYear.Width = 70;
 
-            DataGridViewTextBoxColumn AlbumID = new DataGridViewTextBoxColumn();
-            GroupsID.DataPropertyName = "AlbumID";
-            GroupsID.HeaderText = "AlbumID";
-            GroupsID.Visible = true;
-            GroupsID.Name = "AlbumID";
-            GroupsID.Width = 63;
+                DataGridViewTextBoxColumn MixSongID = new DataGridViewTextBoxColumn();
+                MixSongID.DataPropertyName = "MixSongID";
+                MixSongID.HeaderText = "MixSongID";
+                MixSongID.Visible = true;
+                MixSongID.Name = "MixSongID";
+                MixSongID.Width = 60;
 
-            DataGridViewTextBoxColumn LabelID = new DataGridViewTextBoxColumn();
-            LabelID.DataPropertyName = "LabelID";
-            LabelID.HeaderText = "LabelID";
-            LabelID.Visible = true;
-            LabelID.Name = "LabelID";
-            LabelID.Width = 63;
+                DataGridViewTextBoxColumn GroupsID = new DataGridViewTextBoxColumn();
+                GroupsID.DataPropertyName = "GroupsID";
+                GroupsID.HeaderText = "GroupsID";
+                GroupsID.Visible = true;
+                GroupsID.Name = "GroupsID";
+                GroupsID.Width = 63;
 
-            DataGridViewTextBoxColumn Info = new DataGridViewTextBoxColumn();
-            Info.DataPropertyName = "Info";
-            Info.HeaderText = "Info";
-            Info.Visible = true;
-            Info.Name = "Info";
-            Info.Width = 100;
+                DataGridViewTextBoxColumn AlbumID = new DataGridViewTextBoxColumn();
+                GroupsID.DataPropertyName = "AlbumID";
+                GroupsID.HeaderText = "AlbumID";
+                GroupsID.Visible = true;
+                GroupsID.Name = "AlbumID";
+                GroupsID.Width = 63;
 
-            DataGridViewTextBoxColumn YoutubeVideoID = new DataGridViewTextBoxColumn();
-            YoutubeVideoID.DataPropertyName = "YoutubeVideoID";
-            YoutubeVideoID.HeaderText = "ytID";
-            YoutubeVideoID.Visible = true;
-            YoutubeVideoID.Name = "YoutubeVideoID";
-            YoutubeVideoID.Width = 60;
+                DataGridViewTextBoxColumn LabelID = new DataGridViewTextBoxColumn();
+                LabelID.DataPropertyName = "LabelID";
+                LabelID.HeaderText = "LabelID";
+                LabelID.Visible = true;
+                LabelID.Name = "LabelID";
+                LabelID.Width = 63;
 
-            DataGridViewTextBoxColumn YoutubeStartOffset = new DataGridViewTextBoxColumn();
-            YoutubeStartOffset.DataPropertyName = "YoutubeStartOffset";
-            YoutubeStartOffset.HeaderText = "ytOffset";
-            YoutubeStartOffset.Visible = true;
-            YoutubeStartOffset.Name = "YoutubeStartOffset";
-            YoutubeStartOffset.Width = 60;
+                DataGridViewTextBoxColumn Info = new DataGridViewTextBoxColumn();
+                Info.DataPropertyName = "Info";
+                Info.HeaderText = "Info";
+                Info.Visible = true;
+                Info.Name = "Info";
+                Info.Width = 100;
 
-            DataGridViewTextBoxColumn SourceID = new DataGridViewTextBoxColumn();
-            SourceID.DataPropertyName = "SourceID";
-            SourceID.HeaderText = "SourceID";
-            SourceID.Visible = true;
-            SourceID.Name = "SourceID";
-            SourceID.Width = 60;
+                DataGridViewTextBoxColumn YoutubeVideoID = new DataGridViewTextBoxColumn();
+                YoutubeVideoID.DataPropertyName = "YoutubeVideoID";
+                YoutubeVideoID.HeaderText = "ytID";
+                YoutubeVideoID.Visible = true;
+                YoutubeVideoID.Name = "YoutubeVideoID";
+                YoutubeVideoID.Width = 60;
 
-            DataGridViewTextBoxColumn PlatformID = new DataGridViewTextBoxColumn();
-            PlatformID.DataPropertyName = "PlatformID";
-            PlatformID.HeaderText = "PlatformID";
-            PlatformID.Visible = true;
-            PlatformID.Name = "PlatformID";
-            PlatformID.Width = 60;
+                DataGridViewTextBoxColumn YoutubeStartOffset = new DataGridViewTextBoxColumn();
+                YoutubeStartOffset.DataPropertyName = "YoutubeStartOffset";
+                YoutubeStartOffset.HeaderText = "ytOffset";
+                YoutubeStartOffset.Visible = true;
+                YoutubeStartOffset.Name = "YoutubeStartOffset";
+                YoutubeStartOffset.Width = 60;
 
-            DataGridViewTextBoxColumn PouetID = new DataGridViewTextBoxColumn();
-            PouetID.DataPropertyName = "PouetID";
-            PouetID.HeaderText = "PouetID";
-            PouetID.Visible = true;
-            PouetID.Name = "PouetID";
-            PouetID.Width = 50;
+                DataGridViewTextBoxColumn SourceID = new DataGridViewTextBoxColumn();
+                SourceID.DataPropertyName = "SourceID";
+                SourceID.HeaderText = "SourceID";
+                SourceID.Visible = true;
+                SourceID.Name = "SourceID";
+                SourceID.Width = 60;
 
-            DataGridViewProgressColumn progress = new DataGridViewProgressColumn();
-            progress.DataPropertyName = "Progress";
-            progress.HeaderText = "Upload Progress";
-            progress.ReadOnly = true;
-            progress.Name = "Progress";
-            progress.Visible = false;
+                DataGridViewTextBoxColumn PlatformID = new DataGridViewTextBoxColumn();
+                PlatformID.DataPropertyName = "PlatformID";
+                PlatformID.HeaderText = "PlatformID";
+                PlatformID.Visible = true;
+                PlatformID.Name = "PlatformID";
+                PlatformID.Width = 60;
 
-            dataGridViewTracks.Columns.Add(progress);
-            dataGridViewTracks.Columns.Add(ArtistID);
-            dataGridViewTracks.Columns.Add(File);
-            dataGridViewTracks.Columns.Add(SongName);
-            dataGridViewTracks.Columns.Add(ReleaseYear);
-            dataGridViewTracks.Columns.Add(MixSongID);
-            dataGridViewTracks.Columns.Add(GroupsID);
-            dataGridViewTracks.Columns.Add(AlbumID);
-            dataGridViewTracks.Columns.Add(LabelID);
-            dataGridViewTracks.Columns.Add(Info);
-            dataGridViewTracks.Columns.Add(YoutubeVideoID);
-            dataGridViewTracks.Columns.Add(YoutubeStartOffset);
-            dataGridViewTracks.Columns.Add(SourceID);
-            dataGridViewTracks.Columns.Add(PlatformID);
-            dataGridViewTracks.Columns.Add(PouetID);
+                DataGridViewTextBoxColumn PouetID = new DataGridViewTextBoxColumn();
+                PouetID.DataPropertyName = "PouetID";
+                PouetID.HeaderText = "PouetID";
+                PouetID.Visible = true;
+                PouetID.Name = "PouetID";
+                PouetID.Width = 50;
 
-            dataGridViewTracks.DataSource = ds; //set the datasource to the Track Bindinglist
+                DataGridViewProgressColumn progress = new DataGridViewProgressColumn();
+                progress.DataPropertyName = "Progress";
+                progress.HeaderText = "Upload Progress";
+                progress.ReadOnly = true;
+                progress.Name = "Progress";
+                progress.Visible = false;
 
+                dataGridViewTracks.Columns.Add(progress);
+                dataGridViewTracks.Columns.Add(ArtistID);
+                dataGridViewTracks.Columns.Add(File);
+                dataGridViewTracks.Columns.Add(SongName);
+                dataGridViewTracks.Columns.Add(ReleaseYear);
+                dataGridViewTracks.Columns.Add(MixSongID);
+                dataGridViewTracks.Columns.Add(GroupsID);
+                dataGridViewTracks.Columns.Add(AlbumID);
+                dataGridViewTracks.Columns.Add(LabelID);
+                dataGridViewTracks.Columns.Add(Info);
+                dataGridViewTracks.Columns.Add(YoutubeVideoID);
+                dataGridViewTracks.Columns.Add(YoutubeStartOffset);
+                dataGridViewTracks.Columns.Add(SourceID);
+                dataGridViewTracks.Columns.Add(PlatformID);
+                dataGridViewTracks.Columns.Add(PouetID);
+
+                dataGridViewTracks.DataSource = ds; //set the datasource to the Track Bindinglist
+            }
+            catch (Exception exp)
+            {
+                Console.WriteLine("Exception: " + exp.Message);
+            }
         }
 
 
@@ -377,119 +451,150 @@ namespace RadioPusher2
 
         private void StartUploadProcess()
         {
-            bool errors = false;
-            foreach (Track track in ds)
+            try
             {
-                if (track.ArtistID == 0)
+                bool errors = false;
+                foreach (Track track in ds)
                 {
-                    errors = true;
+                    if (track.ArtistID == 0)
+                    {
+                        errors = true;
+                    }
+                }
+
+                if (errors)
+                {
+                    MessageBox.Show("Sorry, you need to set the artistID's for all the tracks first - HINT: use right mouse button ;) !");
+                    if (InvokeRequired)
+                    {
+                        //we are anonymous! 
+                        BeginInvoke(new MethodInvoker(delegate()
+                        {
+                            buttonAddTracks.Enabled = true;
+                            buttonUpload.Enabled = true;
+                            dataGridViewTracks.Columns[0].Visible = false;
+                            dataGridViewTracks.Refresh();
+                            MessageBox.Show("Hey Sir! Looks like i'm through with the upload queue!");
+                        }));
+                    }
+                    return;
                 }
             }
-
-            if (errors)
+            catch (Exception exp)
             {
-                MessageBox.Show("Sorry, you need to set the artistID's for all the tracks first - HINT: use right mouse button ;) !");
-                if (InvokeRequired)
-                {
-                    //we are anonymous! 
-                    BeginInvoke(new MethodInvoker(delegate()
-                    {
-                        buttonAddTracks.Enabled = true;
-                        buttonUpload.Enabled = true;
-                        dataGridViewTracks.Columns[0].Visible = false;
-                        dataGridViewTracks.Refresh();
-                        MessageBox.Show("Hey Sir! Looks like i'm through with the upload queue!");
-                    }));
-                }
-                return;
+                Console.WriteLine("Exception: " + exp.Message);
             }
 
             new Thread(delegate()
             {
-                NWebClient nwc = new NWebClient(15000);
-                        string res = nwc.DownloadString(config.hostname.Replace("demovibes", "account/signin"));
-                        Dictionary<string, string> kvp = new Dictionary<string, string>();
-                        kvp.Add("next", "");
-                        kvp.Add("username", config.username);
-                        kvp.Add("password", config.password);
-                        kvp.Add("blogin", "Sign+in");
-                        res = nwc.PostAction(config.hostname.Replace("demovibes", "account/signin"), kvp);
-                        if (res.Contains("Welcome, " + config.username)){ //are we logged in?
-                            int z = 0;
-                            foreach (Track track in ds){ //loop over all tracks
+                try
+                {
+                    NWebClient nwc = new NWebClient(15000);
+                    string res = nwc.DownloadString(config.hostname.Replace("demovibes", "account/signin"));
+                    Dictionary<string, string> kvp = new Dictionary<string, string>();
+                    kvp.Add("next", "");
+                    kvp.Add("username", config.username);
+                    kvp.Add("password", config.password);
+                    kvp.Add("blogin", "Sign+in");
+                    res = nwc.PostAction(config.hostname.Replace("demovibes", "account/signin"), kvp);
+                    if (res.Contains("Welcome, " + config.username))
+                    { //are we logged in?
+                        int z = 0;
+                        foreach (Track track in ds)
+                        { //loop over all tracks
 
-                                if (track.Progress == 100){ //this track has already been upped ;)
-                                    z++;
-                                    continue;
-                                }
-
-                                    //send the data
-                                    kvp.Clear();
-                                    if (track.ArtistID == 0 || track.ArtistID.Equals(""))
-                                    {
-                                        MessageBox.Show("no artist id set for track:" + track.SongName);
-                                        break;
-                                    }
-                                    kvp.Add("title", track.SongName);
-                                    kvp.Add("release_year", track.ReleaseYear.ToString());
-                                    if (track.MixSongID > 0){
-                                        kvp.Add("remix_of_id", "");
-                                    }
-                                    //TODO: add support for groups, labels and type
-                                    // kvp.Add("groups[]", "");
-                                    // kvp.Add("labels[]", "");
-                                    kvp.Add("info", track.Info);
-                                    //kvp.Add("type", null);
-                                    if (track.PlatformID > 0){
-                                        kvp.Add("platform", track.PlatformID.ToString());
-                                    }
-                                    kvp.Add("pouetid", track.PouetID.ToString());
-                                    if (track.YoutubeVideoID > 0) { 
-                                        kvp.Add("ytvidid", track.YoutubeVideoID.ToString());
-                                                                  
-                                    }
-                                    kvp.Add("ytvidoffset", track.YoutubeStartOffset.ToString());         
-                                    current_track_in_upload_queue = z; //does this work.. pretty weak stuff :S
-                                    nwc.UploadProgress += new UploadProgressDelegate(nwc_UploadProgress);
-                                    nwc.TimeOut = 0;
-                                    res = nwc.PostMultipartData(config.hostname.Replace("demovibes/", "demovibes") + "/artist/" + track.ArtistID.ToString() + "/upload/", 
-                                                                        kvp, 
-                                                                        "file", 
-                                                                        System.IO.File.ReadAllBytes(track.File)
-                                                                        );
-                                    if (!res.Contains("Preview:")){
-                                        MessageBox.Show("Something went wrong when i tried to upload: " + track.File);
-                                    }
-                                if (InvokeRequired) { BeginInvoke(new MethodInvoker(delegate() { dataGridViewTracks.Refresh(); })); }
+                            if (track.Progress == 100)
+                            { //this track has already been upped ;)
                                 z++;
+                                continue;
                             }
-                        }else{
-                            MessageBox.Show("Something is wrong with your configuration - i can't login");
+
+                            //send the data
+                            kvp.Clear();
+                            if (track.ArtistID == 0 || track.ArtistID.Equals(""))
+                            {
+                                MessageBox.Show("no artist id set for track:" + track.SongName);
+                                break;
+                            }
+                            kvp.Add("title", track.SongName);
+                            kvp.Add("release_year", track.ReleaseYear.ToString());
+                            if (track.MixSongID > 0)
+                            {
+                                kvp.Add("remix_of_id", "");
+                            }
+                            //TODO: add support for groups, labels and type
+                            // kvp.Add("groups[]", "");
+                            // kvp.Add("labels[]", "");
+                            kvp.Add("info", track.Info);
+                            //kvp.Add("type", null);
+                            if (track.PlatformID > 0)
+                            {
+                                kvp.Add("platform", track.PlatformID.ToString());
+                            }
+                            kvp.Add("pouetid", track.PouetID.ToString());
+                            if (track.YoutubeVideoID > 0)
+                            {
+                                kvp.Add("ytvidid", track.YoutubeVideoID.ToString());
+
+                            }
+                            kvp.Add("ytvidoffset", track.YoutubeStartOffset.ToString());
+                            current_track_in_upload_queue = z; //does this work.. pretty weak stuff :S
+                            nwc.UploadProgress += new UploadProgressDelegate(nwc_UploadProgress);
+                            nwc.TimeOut = 0;
+                            res = nwc.PostMultipartData(config.hostname.Replace("demovibes/", "demovibes") + "/artist/" + track.ArtistID.ToString() + "/upload/",
+                                                                kvp,
+                                                                "file",
+                                                                System.IO.File.ReadAllBytes(track.File)
+                                                                );
+                            if (!res.Contains("Preview:"))
+                            {
+                                MessageBox.Show("Something went wrong when i tried to upload: " + track.File);
+                            }
+                            if (InvokeRequired) { BeginInvoke(new MethodInvoker(delegate() { dataGridViewTracks.Refresh(); })); }
+                            z++;
                         }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Something is wrong with your configuration - i can't login");
+                    }
 
 
-                if (InvokeRequired){
-                    //we are anonymous! 
-                    BeginInvoke(new MethodInvoker(delegate() {
-                        buttonAddTracks.Enabled = true;
-                        buttonUpload.Enabled = true;
-                        dataGridViewTracks.Columns[0].Visible = false;
-                        dataGridViewTracks.Refresh();
-                        MessageBox.Show("Hey Sir! Looks like i'm through with the upload queue!");
-                    }));
+                    if (InvokeRequired)
+                    {
+                        //we are anonymous! 
+                        BeginInvoke(new MethodInvoker(delegate()
+                        {
+                            buttonAddTracks.Enabled = true;
+                            buttonUpload.Enabled = true;
+                            dataGridViewTracks.Columns[0].Visible = false;
+                            dataGridViewTracks.Refresh();
+                            MessageBox.Show("Hey Sir! Looks like i'm through with the upload queue!");
+                        }));
+                    }
                 }
-                
+                catch (Exception exp)
+                {
+                    Console.WriteLine("Exception: " + exp.Message);
+                }
             }).Start();
         }
 
         void nwc_UploadProgress(long pos, long total)
         {
-            int check = ds[current_track_in_upload_queue].Progress;
-            long progress = (pos * 100) / total;
-            if (check < Int32.Parse(progress.ToString()))
+            try
             {
-                ds[current_track_in_upload_queue].Progress = Int32.Parse(progress.ToString());
-                if (InvokeRequired) { BeginInvoke(new MethodInvoker(delegate() { dataGridViewTracks.Refresh(); })); }
+                int check = ds[current_track_in_upload_queue].Progress;
+                long progress = (pos * 100) / total;
+                if (check < Int32.Parse(progress.ToString()))
+                {
+                    ds[current_track_in_upload_queue].Progress = Int32.Parse(progress.ToString());
+                    if (InvokeRequired) { BeginInvoke(new MethodInvoker(delegate() { dataGridViewTracks.Refresh(); })); }
+                }
+            }
+            catch (Exception exp)
+            {
+                Console.WriteLine("Exception: " + exp.Message);
             }
         }
 
@@ -506,45 +611,61 @@ namespace RadioPusher2
 
         private void dataGridViewTracks_DragDrop(object sender, DragEventArgs e)
         {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            try
             {
-                //GOT FILEZ! 
-                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);                
-                List<string> filetypes = new List<string>();
-                filetypes.Add(".s3m");
-                filetypes.Add(".xm");
-                filetypes.Add(".it");
-                filetypes.Add(".mp3");
-                filetypes.Add(".mp4");
-                filetypes.Add(".m4a");
-                filetypes.Add(".ogg");
-                filetypes.Add(".mod");
-                filetypes.Add(".mtm");
-                filetypes.Add(".umx");
-                filetypes.Add(".it");
-                foreach (string filename in files)
+                if (e.Data.GetDataPresent(DataFormats.FileDrop))
                 {
-                    FileInfo f = new FileInfo(filename);
-                    bool match = false;
-                    foreach (string ft in filetypes) {
-                        if (ft.Equals(f.Extension)){
-                            match = true;
-                        }
-                    }
-                    if (match)
+                    //GOT FILEZ! 
+                    string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                    List<string> filetypes = new List<string>();
+                    filetypes.Add(".s3m");
+                    filetypes.Add(".xm");
+                    filetypes.Add(".it");
+                    filetypes.Add(".mp3");
+                    filetypes.Add(".mp4");
+                    filetypes.Add(".m4a");
+                    filetypes.Add(".ogg");
+                    filetypes.Add(".mod");
+                    filetypes.Add(".mtm");
+                    filetypes.Add(".umx");
+                    filetypes.Add(".it");
+                    foreach (string filename in files)
                     {
-                        ds.Add(new Track(filename));
-                    }
+                        FileInfo f = new FileInfo(filename);
+                        bool match = false;
+                        foreach (string ft in filetypes)
+                        {
+                            if (ft.Equals(f.Extension))
+                            {
+                                match = true;
+                            }
+                        }
+                        if (match)
+                        {
+                            ds.Add(new Track(filename));
+                        }
 
+                    }
                 }
+            }
+            catch (Exception exp)
+            {
+                Console.WriteLine("Exception: " + exp.Message);
             }
         }
 
         private void dataGridViewTracks_DragEnter(object sender, DragEventArgs e)
         {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            try
             {
-                e.Effect = DragDropEffects.Move;
+                if (e.Data.GetDataPresent(DataFormats.FileDrop))
+                {
+                    e.Effect = DragDropEffects.Move;
+                }
+            }
+            catch (Exception exp)
+            {
+                Console.WriteLine("Exception: " + exp.Message);
             }
         }
 

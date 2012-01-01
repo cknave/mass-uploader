@@ -32,6 +32,8 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.dataGridViewTracks = new System.Windows.Forms.DataGridView();
             this.buttonUpload = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
@@ -39,7 +41,6 @@
             this.button3 = new System.Windows.Forms.Button();
             this.buttonLookupArtist = new System.Windows.Forms.Button();
             this.buttonAddTracks = new System.Windows.Forms.Button();
-            this.dataGridViewTracks = new System.Windows.Forms.DataGridView();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
@@ -50,8 +51,13 @@
             this.toolStripTextBoxQuery = new System.Windows.Forms.ToolStripTextBox();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.buttonStop = new System.Windows.Forms.Button();
+            this.textboxDebug = new Utils.NRichTextBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
+            this.splitContainer1.Panel1.SuspendLayout();
+            this.splitContainer1.Panel2.SuspendLayout();
+            this.splitContainer1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewTracks)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
@@ -69,11 +75,12 @@
             this.tabControl1.Location = new System.Drawing.Point(12, 98);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(993, 363);
+            this.tabControl1.Size = new System.Drawing.Size(993, 372);
             this.tabControl1.TabIndex = 0;
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.splitContainer1);
             this.tabPage1.Controls.Add(this.buttonUpload);
             this.tabPage1.Controls.Add(this.button2);
             this.tabPage1.Controls.Add(this.button1);
@@ -81,19 +88,50 @@
             this.tabPage1.Controls.Add(this.button3);
             this.tabPage1.Controls.Add(this.buttonLookupArtist);
             this.tabPage1.Controls.Add(this.buttonAddTracks);
-            this.tabPage1.Controls.Add(this.dataGridViewTracks);
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(985, 337);
+            this.tabPage1.Size = new System.Drawing.Size(985, 346);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Tracks";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
+            // splitContainer1
+            // 
+            this.splitContainer1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.splitContainer1.Location = new System.Drawing.Point(6, 35);
+            this.splitContainer1.Name = "splitContainer1";
+            this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitContainer1.Panel1
+            // 
+            this.splitContainer1.Panel1.Controls.Add(this.dataGridViewTracks);
+            // 
+            // splitContainer1.Panel2
+            // 
+            this.splitContainer1.Panel2.Controls.Add(this.textboxDebug);
+            this.splitContainer1.Size = new System.Drawing.Size(973, 276);
+            this.splitContainer1.SplitterDistance = 194;
+            this.splitContainer1.TabIndex = 5;
+            // 
+            // dataGridViewTracks
+            // 
+            this.dataGridViewTracks.AllowDrop = true;
+            this.dataGridViewTracks.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridViewTracks.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dataGridViewTracks.Location = new System.Drawing.Point(0, 0);
+            this.dataGridViewTracks.Name = "dataGridViewTracks";
+            this.dataGridViewTracks.Size = new System.Drawing.Size(973, 194);
+            this.dataGridViewTracks.TabIndex = 0;
+            this.dataGridViewTracks.DragDrop += new System.Windows.Forms.DragEventHandler(this.dataGridViewTracks_DragDrop);
+            this.dataGridViewTracks.DragEnter += new System.Windows.Forms.DragEventHandler(this.dataGridViewTracks_DragEnter);
+            // 
             // buttonUpload
             // 
             this.buttonUpload.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonUpload.Location = new System.Drawing.Point(872, 308);
+            this.buttonUpload.Location = new System.Drawing.Point(872, 317);
             this.buttonUpload.Name = "buttonUpload";
             this.buttonUpload.Size = new System.Drawing.Size(75, 23);
             this.buttonUpload.TabIndex = 4;
@@ -105,7 +143,7 @@
             // 
             this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.button2.Enabled = false;
-            this.button2.Location = new System.Drawing.Point(474, 308);
+            this.button2.Location = new System.Drawing.Point(474, 317);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(111, 23);
             this.button2.TabIndex = 3;
@@ -116,7 +154,7 @@
             // 
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.button1.Enabled = false;
-            this.button1.Location = new System.Drawing.Point(338, 308);
+            this.button1.Location = new System.Drawing.Point(338, 317);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(130, 23);
             this.button1.TabIndex = 3;
@@ -127,7 +165,7 @@
             // 
             this.buttonLookupCompilation.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.buttonLookupCompilation.Enabled = false;
-            this.buttonLookupCompilation.Location = new System.Drawing.Point(99, 308);
+            this.buttonLookupCompilation.Location = new System.Drawing.Point(99, 317);
             this.buttonLookupCompilation.Name = "buttonLookupCompilation";
             this.buttonLookupCompilation.Size = new System.Drawing.Size(116, 23);
             this.buttonLookupCompilation.TabIndex = 3;
@@ -138,7 +176,7 @@
             // 
             this.button3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.button3.Enabled = false;
-            this.button3.Location = new System.Drawing.Point(221, 308);
+            this.button3.Location = new System.Drawing.Point(221, 317);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(111, 23);
             this.button3.TabIndex = 3;
@@ -149,7 +187,7 @@
             // 
             this.buttonLookupArtist.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.buttonLookupArtist.Enabled = false;
-            this.buttonLookupArtist.Location = new System.Drawing.Point(6, 308);
+            this.buttonLookupArtist.Location = new System.Drawing.Point(6, 317);
             this.buttonLookupArtist.Name = "buttonLookupArtist";
             this.buttonLookupArtist.Size = new System.Drawing.Size(87, 23);
             this.buttonLookupArtist.TabIndex = 3;
@@ -167,25 +205,11 @@
             this.buttonAddTracks.UseVisualStyleBackColor = true;
             this.buttonAddTracks.Click += new System.EventHandler(this.buttonAddTracks_Click);
             // 
-            // dataGridViewTracks
-            // 
-            this.dataGridViewTracks.AllowDrop = true;
-            this.dataGridViewTracks.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.dataGridViewTracks.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridViewTracks.Location = new System.Drawing.Point(6, 35);
-            this.dataGridViewTracks.Name = "dataGridViewTracks";
-            this.dataGridViewTracks.Size = new System.Drawing.Size(941, 270);
-            this.dataGridViewTracks.TabIndex = 0;
-            this.dataGridViewTracks.DragDrop += new System.Windows.Forms.DragEventHandler(this.dataGridViewTracks_DragDrop);
-            this.dataGridViewTracks.DragEnter += new System.Windows.Forms.DragEventHandler(this.dataGridViewTracks_DragEnter);
-            // 
             // statusStrip1
             // 
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel1});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 472);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 481);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(1068, 22);
             this.statusStrip1.TabIndex = 1;
@@ -265,12 +289,23 @@
             this.buttonStop.UseVisualStyleBackColor = true;
             this.buttonStop.Click += new System.EventHandler(this.buttonStop_Click);
             // 
+            // textboxDebug
+            // 
+            this.textboxDebug.AutoScroll1 = false;
+            this.textboxDebug.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textboxDebug.Location = new System.Drawing.Point(0, 0);
+            this.textboxDebug.Name = "textboxDebug";
+            this.textboxDebug.ReadOnly = true;
+            this.textboxDebug.Size = new System.Drawing.Size(973, 78);
+            this.textboxDebug.TabIndex = 0;
+            this.textboxDebug.Text = "";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(1068, 494);
+            this.ClientSize = new System.Drawing.Size(1068, 503);
             this.Controls.Add(this.buttonStop);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.trackBarVolume);
@@ -283,6 +318,10 @@
             this.Text = "Demovibes Uploadtool";
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
+            this.splitContainer1.Panel1.ResumeLayout(false);
+            this.splitContainer1.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
+            this.splitContainer1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewTracks)).EndInit();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
@@ -291,7 +330,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.trackBarVolume)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.contextMenuStripArtistSearch.ResumeLayout(false);
-            this.contextMenuStripArtistSearch.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -319,6 +357,8 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.Button buttonUpload;
         private System.Windows.Forms.Button buttonStop;
+        private System.Windows.Forms.SplitContainer splitContainer1;
+        private Utils.NRichTextBox textboxDebug;
     }
 }
 
