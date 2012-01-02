@@ -64,13 +64,13 @@ namespace RadioPusher2
             query = initialQuery;
             textBoxSearch.Text = query;
             NodeKey = nodekey;
-
+            _PerformSearch();
             if (!MultiSelectionMode) {
                 textBoxSelection.Visible = false;
                 buttonOK.Visible = false;
             } else {
                 
-                _PerformSearch();
+               
                 
                 if (values != null) {
                     new Thread(delegate() {

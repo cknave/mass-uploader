@@ -106,21 +106,21 @@ namespace RadioPusher2
                             }
                         }
 
-                        if (hti.ColumnIndex > 0 && hti.ColumnIndex != 8 && hti.ColumnIndex != 9)
+                        if (hti.ColumnIndex > 0 && hti.ColumnIndex != 8 && hti.ColumnIndex != 14 && hti.ColumnIndex != 7)
                         {
                             SelectedCell = hti.ColumnIndex;
                             if (hti.ColumnIndex == 1) { /* artist */        if (ds[hti.RowIndex].ArtistID > 0)             {ShowCopyContextMenu(hti.ColumnIndex); } }
                             if(hti.ColumnIndex == 4) { /* release year */   if (ds[hti.RowIndex].ReleaseYear > 0)          {ShowCopyContextMenu(hti.ColumnIndex); } }
                             if(hti.ColumnIndex == 5) { /* mix song id */    if (ds[hti.RowIndex].MixSongID > 0)            {ShowCopyContextMenu(hti.ColumnIndex); } }
                             if(hti.ColumnIndex == 6) { /* album id */       if (ds[hti.RowIndex].AlbumID > 0)              {ShowCopyContextMenu(hti.ColumnIndex); } }
-                          //  if(hti.ColumnIndex == 8) { /* label id */       if (ds[hti.RowIndex].LabelIDs == 0)             {ShowCopyContextMenu(hti.ColumnIndex); } }
+                          //  if(hti.ColumnIndex == 7) { /* label id */       if (ds[hti.RowIndex].LabelIDs == 0)             {ShowCopyContextMenu(hti.ColumnIndex); } }
                           //  if(hti.ColumnIndex == 9) { /* info */           if (!ds[hti.RowIndex].Info.Equals(""))                 {ShowCopyContextMenu(hti.ColumnIndex); } }
 
-                            if(hti.ColumnIndex == 10) { /* ytID */          if (ds[hti.RowIndex].YoutubeVideoID > 0)       {ShowCopyContextMenu(hti.ColumnIndex); } }
-                            if(hti.ColumnIndex == 11) { /* ytOffset */      if (ds[hti.RowIndex].YoutubeStartOffset > 0)   {ShowCopyContextMenu(hti.ColumnIndex); } }
-                            if(hti.ColumnIndex == 12) { /* sourceID */      if (ds[hti.RowIndex].SourceID > 0)             { ShowCopyContextMenu(hti.ColumnIndex); } }
-                            if(hti.ColumnIndex == 13) { /* platformID */    if (ds[hti.RowIndex].PlatformID > 0)           {ShowCopyContextMenu(hti.ColumnIndex); } }
-                            if (hti.ColumnIndex == 14) { /* pouetID */      if (ds[hti.RowIndex].PouetID > 0)              { ShowCopyContextMenu(hti.ColumnIndex); } }
+                            if(hti.ColumnIndex == 9) { /* ytID */          if (ds[hti.RowIndex].YoutubeVideoID > 0)       {ShowCopyContextMenu(hti.ColumnIndex); } }
+                            if(hti.ColumnIndex == 10) { /* ytOffset */      if (ds[hti.RowIndex].YoutubeStartOffset > 0)   {ShowCopyContextMenu(hti.ColumnIndex); } }
+                            if(hti.ColumnIndex == 11) { /* sourceID */      if (ds[hti.RowIndex].SourceID > 0)             { ShowCopyContextMenu(hti.ColumnIndex); } }
+                            if(hti.ColumnIndex == 12) { /* platformID */    if (ds[hti.RowIndex].PlatformID > 0)           {ShowCopyContextMenu(hti.ColumnIndex); } }
+                            if (hti.ColumnIndex == 13) { /* pouetID */      if (ds[hti.RowIndex].PouetID > 0)              { ShowCopyContextMenu(hti.ColumnIndex); } }
                         }
                         if (hti.ColumnIndex == 1){ //artist row clicked
                             if (ds[hti.RowIndex].ArtistID == 0){
@@ -132,21 +132,7 @@ namespace RadioPusher2
                                     ds[hti.RowIndex].ArtistID = 0;
                                 }
                             }
-                        }
-                        /*
-                              4 = release year
-                              5 = mix song id
-                                
-                              6 = album id
-                              8 = label id
-                              9 = info
-                              10 = ytID
-                              11 = ytOffset
-                              12 = sourceID
-                              13 = platformID
-                              14 = pouetID
-                         * 15 = groups Id
-                          */
+                        }   
                         if (hti.ColumnIndex == 5) { // mix song id selected
                             if (ds[hti.RowIndex].MixSongID == 0) {
                                 SearchForm sf = new SearchForm(false,nwc,String.Format("{0}search/ajax/song/?q=", config.hostname.Replace("/demovibes/", "/")), ds[hti.RowIndex].SongName, "id", "title", "songs",null);
@@ -159,15 +145,53 @@ namespace RadioPusher2
                             }
                         }
 
+                        if (hti.ColumnIndex == 11) { //sourceID
+                            if (ds[hti.RowIndex].SourceID == 0) {
+                                SearchForm sf = new SearchForm(false, nwc, String.Format("REGEX:{0}demovibes/artist/1/upload/", config.hostname.Replace("/demovibes/", "/")), "", "<option value=\"(?<key>.+?)\">(?<value>.+?)</option>", "<select name=\"type\" id=\"id_type\">(?<match>.+?)</select", "", ds[hti.RowIndex].GroupsIDs);
+                                sf.ShowDialog();
+                                try {
+                                    ds[hti.RowIndex].SourceID = Int32.Parse(sf.ResultKey);
+                                } catch {
+                                    ds[hti.RowIndex].SourceID = 0;
+                                }
+                            }
+                        }
+
+
+                        if (hti.ColumnIndex == 12) { //platform
+                            if (ds[hti.RowIndex].PlatformID == 0) {
+                                SearchForm sf = new SearchForm(false, nwc, String.Format("REGEX:{0}demovibes/artist/1/upload/", config.hostname.Replace("/demovibes/", "/")), "", "<option value=\"(?<key>.+?)\">(?<value>.+?)</option>", "<select name=\"platform\" id=\"id_platform\">(?<match>.+?)</select", "", null);
+                                sf.ShowDialog();
+                                try {
+                                    ds[hti.RowIndex].PlatformID = Int32.Parse(sf.ResultKey);
+                                } catch {
+                                    ds[hti.RowIndex].PlatformID = 0;
+                                }
+                            }
+                        }
+                        //<select multiple="multiple" name="labels" id="id_labels">
+                        if (hti.ColumnIndex == 7) { //platform
+                           // if (ds[hti.RowIndex].PlatformID == 0) {
+                                SearchForm sf = new SearchForm(true, nwc, String.Format("REGEX:{0}demovibes/artist/1/upload/", config.hostname.Replace("/demovibes/", "/")), "", "<option value=\"(?<key>.+?)\">(?<value>.+?)</option>", "<select multiple=\"multiple\" name=\"labels\" id=\"id_labels\">(?<match>.+?)</select", "", ds[hti.RowIndex].LabelIDs);
+                                sf.ShowDialog();
+                                try {
+                                    ds[hti.RowIndex].LabelIDs.Clear();
+                                    ds[hti.RowIndex].LabelIDs.AddRange(sf.SelectionList);
+                                } catch {
+                                 
+                                }
+                         //   }
+                        }
+
                         if (hti.ColumnIndex == 14) {
 //                            if (ds[hti.RowIndex].GroupsIDs == 0) {
                             //<select multiple="multiple" name="groups" id="id_groups"><option value="269">1oo%</option><option value="81">2000 A.D.</option>
                             SearchForm sf = new SearchForm(true, nwc, String.Format("REGEX:{0}demovibes/artist/1/upload/", config.hostname.Replace("/demovibes/", "/")), "", "<option value=\"(?<key>.+?)\">(?<value>.+?)</option>", "<select multiple=\"multiple\" name=\"groups\" id=\"id_groups\">(?<match>.+?)</select", "", ds[hti.RowIndex].GroupsIDs);
                                 sf.ShowDialog();
-                                ds[hti.RowIndex].GroupsIDs.Clear();
-                                ds[hti.RowIndex].GroupsIDs.AddRange(sf.SelectionList);
-                                try {
 
+                                try {
+                                    ds[hti.RowIndex].GroupsIDs.Clear();
+                                    ds[hti.RowIndex].GroupsIDs.AddRange(sf.SelectionList);
                                 } catch {
                                 }
  //                           }
@@ -403,11 +427,11 @@ namespace RadioPusher2
                 AlbumID.Name = "AlbumID";
                 AlbumID.Width = 63;
 
-                DataGridViewTextBoxColumn LabelID = new DataGridViewTextBoxColumn();
-                LabelID.DataPropertyName = "LabelID";
-                LabelID.HeaderText = "LabelID";
+                DataGridViewListColumn LabelID = new DataGridViewListColumn();
+                LabelID.DataPropertyName = "LabelIDs";
+                LabelID.HeaderText = "LabelIDs";
                 LabelID.Visible = true;
-                LabelID.Name = "LabelID";
+                LabelID.Name = "LabelIDs";
                 LabelID.Width = 63;
 
                 DataGridViewTextBoxColumn Info = new DataGridViewTextBoxColumn();
@@ -520,23 +544,23 @@ namespace RadioPusher2
                        /* case 9:
                             aid = ds[rowIndex].Info;
                         break; */
-                        case 10:
+                        case 9:
                             aid = ds[rowIndex].YoutubeVideoID;
                             for (int i = 0; i < ds.Count; i++) { ds[i].YoutubeVideoID = aid; }
                         break;
-                        case 11:
+                        case 10:
                             aid = ds[rowIndex].YoutubeStartOffset;
                             for (int i = 0; i < ds.Count; i++) { ds[i].YoutubeStartOffset = aid; }
                         break;
-                        case 12:
+                        case 11:
                             aid = ds[rowIndex].SourceID;
                             for (int i = 0; i < ds.Count; i++) { ds[i].SourceID = aid; }
                         break;
-                        case 13:
+                        case 12:
                             aid = ds[rowIndex].PlatformID;
                             for (int i = 0; i < ds.Count; i++) { ds[i].PlatformID = aid; }
                         break;
-                        case 14:
+                        case 13:
                             aid = ds[rowIndex].PouetID;
                             for (int i = 0; i < ds.Count; i++) { ds[i].PouetID = aid; }
                         break;
@@ -573,23 +597,23 @@ namespace RadioPusher2
                         /* case 9:
                              aid = ds[rowIndex].Info;
                          break; */
-                        case 10:
+                        case 9:
                             aid = ds[rowIndex].YoutubeVideoID;
                             for (int i = rowIndex; i < ds.Count; i++) { ds[i].YoutubeVideoID = aid; }
                             break;
-                        case 11:
+                        case 10:
                             aid = ds[rowIndex].YoutubeStartOffset;
                             for (int i = rowIndex; i < ds.Count; i++) { ds[i].YoutubeStartOffset = aid; }
                             break;
-                        case 12:
+                        case 11:
                             aid = ds[rowIndex].SourceID;
                             for (int i = rowIndex; i < ds.Count; i++) { ds[i].SourceID = aid; }
                             break;
-                        case 13:
+                        case 12:
                             aid = ds[rowIndex].PlatformID;
                             for (int i = rowIndex; i < ds.Count; i++) { ds[i].PlatformID = aid; }
                             break;
-                        case 14:
+                        case 13:
                             aid = ds[rowIndex].PouetID;
                             for (int i = rowIndex; i < ds.Count; i++) { ds[i].PouetID = aid; }
                             break;
