@@ -31,6 +31,9 @@
             this.textBoxSearch = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.dataGridViewSearch = new System.Windows.Forms.DataGridView();
+            this.textBoxSelection = new System.Windows.Forms.TextBox();
+            this.buttonOK = new System.Windows.Forms.Button();
+            this.textBoxSelectionValues = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewSearch)).BeginInit();
             this.SuspendLayout();
             // 
@@ -61,14 +64,48 @@
             this.dataGridViewSearch.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridViewSearch.Location = new System.Drawing.Point(12, 32);
             this.dataGridViewSearch.Name = "dataGridViewSearch";
-            this.dataGridViewSearch.Size = new System.Drawing.Size(250, 218);
+            this.dataGridViewSearch.Size = new System.Drawing.Size(250, 243);
             this.dataGridViewSearch.TabIndex = 2;
+            // 
+            // textBoxSelection
+            // 
+            this.textBoxSelection.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBoxSelection.Location = new System.Drawing.Point(15, 283);
+            this.textBoxSelection.Name = "textBoxSelection";
+            this.textBoxSelection.ReadOnly = true;
+            this.textBoxSelection.Size = new System.Drawing.Size(194, 20);
+            this.textBoxSelection.TabIndex = 3;
+            // 
+            // buttonOK
+            // 
+            this.buttonOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonOK.Location = new System.Drawing.Point(215, 281);
+            this.buttonOK.Name = "buttonOK";
+            this.buttonOK.Size = new System.Drawing.Size(47, 23);
+            this.buttonOK.TabIndex = 4;
+            this.buttonOK.Text = "OK";
+            this.buttonOK.UseVisualStyleBackColor = true;
+            this.buttonOK.Click += new System.EventHandler(this.buttonOK_Click);
+            // 
+            // textBoxSelectionValues
+            // 
+            this.textBoxSelectionValues.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBoxSelectionValues.Location = new System.Drawing.Point(15, 309);
+            this.textBoxSelectionValues.Name = "textBoxSelectionValues";
+            this.textBoxSelectionValues.ReadOnly = true;
+            this.textBoxSelectionValues.Size = new System.Drawing.Size(247, 20);
+            this.textBoxSelectionValues.TabIndex = 3;
             // 
             // SearchForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(274, 262);
+            this.ClientSize = new System.Drawing.Size(274, 335);
+            this.Controls.Add(this.buttonOK);
+            this.Controls.Add(this.textBoxSelectionValues);
+            this.Controls.Add(this.textBoxSelection);
             this.Controls.Add(this.dataGridViewSearch);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.textBoxSearch);
@@ -85,5 +122,8 @@
         private System.Windows.Forms.TextBox textBoxSearch;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.DataGridView dataGridViewSearch;
+        private System.Windows.Forms.TextBox textBoxSelection;
+        private System.Windows.Forms.Button buttonOK;
+        private System.Windows.Forms.TextBox textBoxSelectionValues;
     }
 }

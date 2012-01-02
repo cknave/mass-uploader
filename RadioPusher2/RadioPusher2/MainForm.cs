@@ -28,7 +28,7 @@ namespace RadioPusher2
         int handle = 0;
         int current_track_in_upload_queue = 0;
         TextWriter _writer = null;
-
+        NWebClient nwc = new NWebClient(15000); //webclient
         public MainForm()
         {
             InitializeComponent();
@@ -52,6 +52,17 @@ namespace RadioPusher2
                 dataGridViewTracks.MouseDown += new MouseEventHandler(dataGridViewTracks_MouseDown);
                 Bass.BASS_Init(-1, 44100, BASSInit.BASS_DEVICE_DEFAULT, System.IntPtr.Zero); //init bass
                 trackBarVolume.Value = (int)(Bass.BASS_GetVolume() * 100); //get the current volume
+                new Thread(delegate() {
+                    if (!_Login()) {
+                        MessageBox.Show("Your login settings are not correct - i can't login");
+                        SettingsForm sf = new SettingsForm();
+                        sf.ShowDialog();
+                        config.loadconfig();
+                        _Login();
+                    } else {
+                        Console.WriteLine("Login Complete - session ready");
+                    }
+                }).Start();
             }
             catch(Exception exp)
             {
@@ -77,10 +88,10 @@ namespace RadioPusher2
                     {
                         if (hti.ColumnIndex == 1)
                         { //artist row clicked
-                            if (ds[hti.RowIndex].ArtistID == 0)
-                            {
-                                SearchForm sf = new SearchForm(String.Format("{0}search/ajax/artist/?q=", config.hostname.Replace("/demovibes/", "/")), ds[hti.RowIndex].ID3Artist, "id", "handle");
-                                sf.ShowDialog(); try
+                            if (ds[hti.RowIndex].ArtistID == 0){
+                                SearchForm sf = new SearchForm(false,nwc,String.Format("{0}search/ajax/artist/?q=", config.hostname.Replace("/demovibes/", "/")), ds[hti.RowIndex].ID3Artist, "id", "handle", "artists",null);
+                                sf.ShowDialog(); 
+                                try
                                 {
                                     ds[hti.RowIndex].ArtistID = Int32.Parse(sf.ResultKey);
                                 }
@@ -94,6 +105,75 @@ namespace RadioPusher2
                                 contextMenuStripArtistSearch.Show(new Point(MousePosition.X, MousePosition.Y));
                             }
                         }
+
+                        if (hti.ColumnIndex > 0 && hti.ColumnIndex != 8 && hti.ColumnIndex != 9)
+                        {
+                            SelectedCell = hti.ColumnIndex;
+                            if (hti.ColumnIndex == 1) { /* artist */        if (ds[hti.RowIndex].ArtistID > 0)             {ShowCopyContextMenu(hti.ColumnIndex); } }
+                            if(hti.ColumnIndex == 4) { /* release year */   if (ds[hti.RowIndex].ReleaseYear > 0)          {ShowCopyContextMenu(hti.ColumnIndex); } }
+                            if(hti.ColumnIndex == 5) { /* mix song id */    if (ds[hti.RowIndex].MixSongID > 0)            {ShowCopyContextMenu(hti.ColumnIndex); } }
+                            if(hti.ColumnIndex == 6) { /* album id */       if (ds[hti.RowIndex].AlbumID > 0)              {ShowCopyContextMenu(hti.ColumnIndex); } }
+                          //  if(hti.ColumnIndex == 8) { /* label id */       if (ds[hti.RowIndex].LabelIDs == 0)             {ShowCopyContextMenu(hti.ColumnIndex); } }
+                          //  if(hti.ColumnIndex == 9) { /* info */           if (!ds[hti.RowIndex].Info.Equals(""))                 {ShowCopyContextMenu(hti.ColumnIndex); } }
+
+                            if(hti.ColumnIndex == 10) { /* ytID */          if (ds[hti.RowIndex].YoutubeVideoID > 0)       {ShowCopyContextMenu(hti.ColumnIndex); } }
+                            if(hti.ColumnIndex == 11) { /* ytOffset */      if (ds[hti.RowIndex].YoutubeStartOffset > 0)   {ShowCopyContextMenu(hti.ColumnIndex); } }
+                            if(hti.ColumnIndex == 12) { /* sourceID */      if (ds[hti.RowIndex].SourceID > 0)             { ShowCopyContextMenu(hti.ColumnIndex); } }
+                            if(hti.ColumnIndex == 13) { /* platformID */    if (ds[hti.RowIndex].PlatformID > 0)           {ShowCopyContextMenu(hti.ColumnIndex); } }
+                            if (hti.ColumnIndex == 14) { /* pouetID */      if (ds[hti.RowIndex].PouetID > 0)              { ShowCopyContextMenu(hti.ColumnIndex); } }
+                        }
+                        if (hti.ColumnIndex == 1){ //artist row clicked
+                            if (ds[hti.RowIndex].ArtistID == 0){
+                                SearchForm sf = new SearchForm(false,nwc,String.Format("{0}search/ajax/artist/?q=", config.hostname.Replace("/demovibes/", "/")), ds[hti.RowIndex].ID3Artist, "id", "handle", "artists",null);
+                                    sf.ShowDialog();
+                                try{
+                                    ds[hti.RowIndex].ArtistID = Int32.Parse(sf.ResultKey);
+                                }catch{
+                                    ds[hti.RowIndex].ArtistID = 0;
+                                }
+                            }
+                        }
+                        /*
+                              4 = release year
+                              5 = mix song id
+                                
+                              6 = album id
+                              8 = label id
+                              9 = info
+                              10 = ytID
+                              11 = ytOffset
+                              12 = sourceID
+                              13 = platformID
+                              14 = pouetID
+                         * 15 = groups Id
+                          */
+                        if (hti.ColumnIndex == 5) { // mix song id selected
+                            if (ds[hti.RowIndex].MixSongID == 0) {
+                                SearchForm sf = new SearchForm(false,nwc,String.Format("{0}search/ajax/song/?q=", config.hostname.Replace("/demovibes/", "/")), ds[hti.RowIndex].SongName, "id", "title", "songs",null);
+                                sf.ShowDialog();
+                                try {
+                                    ds[hti.RowIndex].MixSongID = Int32.Parse(sf.ResultKey);
+                                } catch {
+                                    ds[hti.RowIndex].MixSongID = 0;
+                                }
+                            }
+                        }
+
+                        if (hti.ColumnIndex == 14) {
+//                            if (ds[hti.RowIndex].GroupsIDs == 0) {
+                            //<select multiple="multiple" name="groups" id="id_groups"><option value="269">1oo%</option><option value="81">2000 A.D.</option>
+                            SearchForm sf = new SearchForm(true, nwc, String.Format("REGEX:{0}demovibes/artist/1/upload/", config.hostname.Replace("/demovibes/", "/")), "", "<option value=\"(?<key>.+?)\">(?<value>.+?)</option>", "<select multiple=\"multiple\" name=\"groups\" id=\"id_groups\">(?<match>.+?)</select", "", ds[hti.RowIndex].GroupsIDs);
+                                sf.ShowDialog();
+                                ds[hti.RowIndex].GroupsIDs.Clear();
+                                ds[hti.RowIndex].GroupsIDs.AddRange(sf.SelectionList);
+                                try {
+
+                                } catch {
+                                }
+ //                           }
+                                
+
+                        }
                     }
                 }
             }
@@ -102,6 +182,11 @@ namespace RadioPusher2
                 Console.WriteLine("Exception: " + exp.Message);
             }
 
+        }
+
+        void ShowCopyContextMenu(int columnIndex)
+        {
+            contextMenuStripArtistSearch.Show(new Point(MousePosition.X, MousePosition.Y));
         }
 
         void dataGridViewTracks_CellClick(object sender, DataGridViewCellEventArgs e)
@@ -177,6 +262,7 @@ namespace RadioPusher2
             ofp.Multiselect = true;
             ofp.Filter  = "Mp3 Files (*.mp3)|*.mp3|"
             + "Ogg Files (*.ogg)|*.ogg|"
+            + "Flac Files (*.flac)|*.flac|"
             + "ImpulseTracker Files (*.it)|*.it|"
             + "XM Files (*.xm)|*.xm|"
             + "S3M Files (*.s3m)|*.s3m|"
@@ -241,8 +327,8 @@ namespace RadioPusher2
                     if (track.ArtistID == 0)
                     {
                         //lookup time :)
-                        NWebClient cw = new NWebClient(15000);
-                        string json = cw.DownloadString(String.Format("{0}search/ajax/artist/?q={1}", config.hostname, null));
+                       
+                        string json = nwc.DownloadString(String.Format("{0}search/ajax/artist/?q={1}", config.hostname, null));
                     }
                     it++;
                 }
@@ -302,19 +388,20 @@ namespace RadioPusher2
                 MixSongID.Name = "MixSongID";
                 MixSongID.Width = 60;
 
-                DataGridViewTextBoxColumn GroupsID = new DataGridViewTextBoxColumn();
-                GroupsID.DataPropertyName = "GroupsID";
-                GroupsID.HeaderText = "GroupsID";
+
+                DataGridViewListColumn GroupsID = new DataGridViewListColumn();
+                GroupsID.DataPropertyName = "GroupsIDs";
+                GroupsID.HeaderText = "GroupsIDs";
                 GroupsID.Visible = true;
-                GroupsID.Name = "GroupsID";
-                GroupsID.Width = 63;
+                GroupsID.Name = "GroupsIDs";
+                GroupsID.Width = 96;
 
                 DataGridViewTextBoxColumn AlbumID = new DataGridViewTextBoxColumn();
-                GroupsID.DataPropertyName = "AlbumID";
-                GroupsID.HeaderText = "AlbumID";
-                GroupsID.Visible = true;
-                GroupsID.Name = "AlbumID";
-                GroupsID.Width = 63;
+                AlbumID.DataPropertyName = "AlbumID";
+                AlbumID.HeaderText = "AlbumID";
+                AlbumID.Visible = false;
+                AlbumID.Name = "AlbumID";
+                AlbumID.Width = 63;
 
                 DataGridViewTextBoxColumn LabelID = new DataGridViewTextBoxColumn();
                 LabelID.DataPropertyName = "LabelID";
@@ -378,7 +465,7 @@ namespace RadioPusher2
                 dataGridViewTracks.Columns.Add(SongName);
                 dataGridViewTracks.Columns.Add(ReleaseYear);
                 dataGridViewTracks.Columns.Add(MixSongID);
-                dataGridViewTracks.Columns.Add(GroupsID);
+                
                 dataGridViewTracks.Columns.Add(AlbumID);
                 dataGridViewTracks.Columns.Add(LabelID);
                 dataGridViewTracks.Columns.Add(Info);
@@ -387,7 +474,7 @@ namespace RadioPusher2
                 dataGridViewTracks.Columns.Add(SourceID);
                 dataGridViewTracks.Columns.Add(PlatformID);
                 dataGridViewTracks.Columns.Add(PouetID);
-
+                dataGridViewTracks.Columns.Add(GroupsID);
                 dataGridViewTracks.DataSource = ds; //set the datasource to the Track Bindinglist
             }
             catch (Exception exp)
@@ -401,7 +488,6 @@ namespace RadioPusher2
         {
 
             try{
-                
                 int rowIndex = dataGridViewTracks.SelectedCells[0].RowIndex;
 
                 contextMenuStripArtistSearch.Visible = true;
@@ -410,10 +496,52 @@ namespace RadioPusher2
                 itm.Text = "Copy to all fields in this row";                    
                 itm.Tag = rowIndex;
                 itm.Click += new EventHandler(delegate{
-                    int aid = ds[rowIndex].ArtistID;
-                    for(int i=0;i<ds.Count;i++){
-                        ds[i].ArtistID = aid;
+                    var aid =ds[rowIndex].ArtistID; 
+                    switch (SelectedCell) {
+                        case 1:
+                            aid = ds[rowIndex].ArtistID;
+                            for (int i = 0; i < ds.Count; i++) { ds[i].ArtistID = aid; }
+                        break;
+                        case 4:
+                            aid = ds[rowIndex].ReleaseYear;
+                            for (int i = 0; i < ds.Count; i++) { ds[i].ReleaseYear = aid; }
+                        break;
+                        case 5:
+                            aid = ds[rowIndex].MixSongID;
+                            for (int i = 0; i < ds.Count; i++) { ds[i].MixSongID = aid; }
+                        break;
+                        case 6:
+                            aid = ds[rowIndex].AlbumID;
+                            for (int i = 0; i < ds.Count; i++) { ds[i].AlbumID = aid; }
+                        break;
+                       /* case 8:
+                            aid = ds[rowIndex].LabelIDs;
+                        break; */
+                       /* case 9:
+                            aid = ds[rowIndex].Info;
+                        break; */
+                        case 10:
+                            aid = ds[rowIndex].YoutubeVideoID;
+                            for (int i = 0; i < ds.Count; i++) { ds[i].YoutubeVideoID = aid; }
+                        break;
+                        case 11:
+                            aid = ds[rowIndex].YoutubeStartOffset;
+                            for (int i = 0; i < ds.Count; i++) { ds[i].YoutubeStartOffset = aid; }
+                        break;
+                        case 12:
+                            aid = ds[rowIndex].SourceID;
+                            for (int i = 0; i < ds.Count; i++) { ds[i].SourceID = aid; }
+                        break;
+                        case 13:
+                            aid = ds[rowIndex].PlatformID;
+                            for (int i = 0; i < ds.Count; i++) { ds[i].PlatformID = aid; }
+                        break;
+                        case 14:
+                            aid = ds[rowIndex].PouetID;
+                            for (int i = 0; i < ds.Count; i++) { ds[i].PouetID = aid; }
+                        break;
                     }
+                    
                     dataGridViewTracks.Refresh();
                 });
                 contextMenuStripArtistSearch.Items.Add(itm);
@@ -421,10 +549,50 @@ namespace RadioPusher2
                 itm2.Text = "Copy to all rows in this column below this field";
                 itm2.Tag = rowIndex;
                 itm2.Click += new EventHandler(delegate{
-                    int aid = ds[rowIndex].ArtistID;
-                    for (int i = rowIndex; i < ds.Count; i++)
-                    {
-                        ds[i].ArtistID = aid;
+                    var aid = ds[rowIndex].ArtistID;
+                    switch (SelectedCell) {
+                        case 1:
+                            aid = ds[rowIndex].ArtistID;
+                            for (int i = rowIndex; i < ds.Count; i++) { ds[i].ArtistID = aid; }
+                            break;
+                        case 4:
+                            aid = ds[rowIndex].ReleaseYear;
+                            for (int i = rowIndex; i < ds.Count; i++) { ds[i].ReleaseYear = aid; }
+                            break;
+                        case 5:
+                            aid = ds[rowIndex].MixSongID;
+                            for (int i = rowIndex; i < ds.Count; i++) { ds[i].MixSongID = aid; }
+                            break;
+                        case 6:
+                            aid = ds[rowIndex].AlbumID;
+                            for (int i = rowIndex; i < ds.Count; i++) { ds[i].AlbumID = aid; }
+                            break;
+                        /* case 8:
+                             aid = ds[rowIndex].LabelIDs;
+                         break; */
+                        /* case 9:
+                             aid = ds[rowIndex].Info;
+                         break; */
+                        case 10:
+                            aid = ds[rowIndex].YoutubeVideoID;
+                            for (int i = rowIndex; i < ds.Count; i++) { ds[i].YoutubeVideoID = aid; }
+                            break;
+                        case 11:
+                            aid = ds[rowIndex].YoutubeStartOffset;
+                            for (int i = rowIndex; i < ds.Count; i++) { ds[i].YoutubeStartOffset = aid; }
+                            break;
+                        case 12:
+                            aid = ds[rowIndex].SourceID;
+                            for (int i = rowIndex; i < ds.Count; i++) { ds[i].SourceID = aid; }
+                            break;
+                        case 13:
+                            aid = ds[rowIndex].PlatformID;
+                            for (int i = rowIndex; i < ds.Count; i++) { ds[i].PlatformID = aid; }
+                            break;
+                        case 14:
+                            aid = ds[rowIndex].PouetID;
+                            for (int i = rowIndex; i < ds.Count; i++) { ds[i].PouetID = aid; }
+                            break;
                     }
                     dataGridViewTracks.Refresh();
                 });
@@ -447,6 +615,20 @@ namespace RadioPusher2
             dataGridViewTracks.Columns[0].Visible = true;
             dataGridViewTracks.Refresh();
             StartUploadProcess();
+        }
+
+        private bool _Login(){
+            string res = nwc.DownloadString(config.hostname.Replace("demovibes", "account/signin"));
+            Dictionary<string, string> kvp = new Dictionary<string, string>();
+            kvp.Add("next", "");
+            kvp.Add("username", config.username);
+            kvp.Add("password", config.password);
+            kvp.Add("blogin", "Sign+in");
+            res = nwc.PostAction(config.hostname.Replace("demovibes", "account/signin"), kvp);
+            if (res.Contains("Welcome, " + config.username)) { //are we logged in?
+                return true;
+            }
+            return false;
         }
 
         private void StartUploadProcess()
@@ -489,15 +671,9 @@ namespace RadioPusher2
             {
                 try
                 {
-                    NWebClient nwc = new NWebClient(15000);
-                    string res = nwc.DownloadString(config.hostname.Replace("demovibes", "account/signin"));
                     Dictionary<string, string> kvp = new Dictionary<string, string>();
-                    kvp.Add("next", "");
-                    kvp.Add("username", config.username);
-                    kvp.Add("password", config.password);
-                    kvp.Add("blogin", "Sign+in");
-                    res = nwc.PostAction(config.hostname.Replace("demovibes", "account/signin"), kvp);
-                    if (res.Contains("Welcome, " + config.username))
+                    string res = string.Empty;
+                    if (_Login())
                     { //are we logged in?
                         int z = 0;
                         foreach (Track track in ds)

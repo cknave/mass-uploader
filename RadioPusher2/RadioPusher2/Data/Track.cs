@@ -32,7 +32,6 @@ namespace RadioPusher2.Data
         private int f_YoutubeVideoID = 0;
         private int f_YoutubeStartOffset = 0;
         private string f_ID3Artist = String.Empty;
-        
 
         public int Progress
         {

@@ -34,6 +34,7 @@
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.dataGridViewTracks = new System.Windows.Forms.DataGridView();
+            this.textboxDebug = new Utils.NRichTextBox();
             this.buttonUpload = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
@@ -51,7 +52,6 @@
             this.toolStripTextBoxQuery = new System.Windows.Forms.ToolStripTextBox();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.buttonStop = new System.Windows.Forms.Button();
-            this.textboxDebug = new Utils.NRichTextBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -127,6 +127,17 @@
             this.dataGridViewTracks.TabIndex = 0;
             this.dataGridViewTracks.DragDrop += new System.Windows.Forms.DragEventHandler(this.dataGridViewTracks_DragDrop);
             this.dataGridViewTracks.DragEnter += new System.Windows.Forms.DragEventHandler(this.dataGridViewTracks_DragEnter);
+            // 
+            // textboxDebug
+            // 
+            this.textboxDebug.AutoScroll1 = false;
+            this.textboxDebug.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textboxDebug.Location = new System.Drawing.Point(0, 0);
+            this.textboxDebug.Name = "textboxDebug";
+            this.textboxDebug.ReadOnly = true;
+            this.textboxDebug.Size = new System.Drawing.Size(973, 78);
+            this.textboxDebug.TabIndex = 0;
+            this.textboxDebug.Text = "";
             // 
             // buttonUpload
             // 
@@ -289,17 +300,6 @@
             this.buttonStop.UseVisualStyleBackColor = true;
             this.buttonStop.Click += new System.EventHandler(this.buttonStop_Click);
             // 
-            // textboxDebug
-            // 
-            this.textboxDebug.AutoScroll1 = false;
-            this.textboxDebug.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textboxDebug.Location = new System.Drawing.Point(0, 0);
-            this.textboxDebug.Name = "textboxDebug";
-            this.textboxDebug.ReadOnly = true;
-            this.textboxDebug.Size = new System.Drawing.Size(973, 78);
-            this.textboxDebug.TabIndex = 0;
-            this.textboxDebug.Text = "";
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -330,6 +330,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.trackBarVolume)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.contextMenuStripArtistSearch.ResumeLayout(false);
+            this.contextMenuStripArtistSearch.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 

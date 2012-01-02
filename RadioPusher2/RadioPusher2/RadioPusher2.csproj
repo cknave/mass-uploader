@@ -83,6 +83,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Data\AppSettings.cs" />
+    <Compile Include="Data\DataGridViewListCell.cs" />
     <Compile Include="Data\DataGridViewProgressCell.cs" />
     <Compile Include="Data\json.cs" />
     <Compile Include="Data\Track.cs" />
