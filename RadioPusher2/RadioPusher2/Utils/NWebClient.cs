@@ -304,7 +304,11 @@ namespace Utils
 
                 foreach (KeyValuePair<string, string> d in dict) {                   
                     contents.Append(header);
-                    contents.Append("Content-Disposition: form-data; name=\""+d.Key+"\"" + System.Environment.NewLine);
+                    if (d.Key.Contains("ARRAYHACK")) {
+                        contents.Append("Content-Disposition: form-data; name=\"" + Regex.Match(d.Key,"(?<m>.+?)ARRAYHACK",RegexOptions.Singleline).Groups["m"].Value + "\"" + System.Environment.NewLine);
+                    } else {
+                        contents.Append("Content-Disposition: form-data; name=\"" + d.Key + "\"" + System.Environment.NewLine);
+                    }
                     contents.Append(System.Environment.NewLine);
                     contents.Append(d.Value);
                 }
@@ -330,7 +334,7 @@ namespace Utils
                 {
                     bytesSoFar += bytesRead;
                     requestStream.Write(buffer, 0, bytesRead);
-                    Debug.WriteLine(String.Format("sending file data {0:0.000}%", (bytesSoFar * 100.0f) / fs.Length));
+                  //  Debug.WriteLine(String.Format("sending file data {0:0.000}%", (bytesSoFar * 100.0f) / fs.Length));
                     UploadProgress(bytesSoFar, fs.Length);
                 }
 

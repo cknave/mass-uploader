@@ -737,16 +737,39 @@ namespace RadioPusher2
                                 kvp.Add("ytvidid", track.YoutubeVideoID.ToString());
 
                             }
+
+                            if (track.SourceID > 0) {
+                                kvp.Add("type", track.SourceID.ToString());
+                            }
+                            if (track.GroupsIDs.Count > 0) {
+                                int i =0;
+                                foreach(int a in track.GroupsIDs){
+                                    i++;
+                                    kvp.Add("groupsARRAYHACK" + i.ToString(), a.ToString());
+                                }
+                            }
+
+                            if (track.LabelIDs.Count > 0) {
+                                int i = 0;
+                                foreach (int a in track.LabelIDs) {
+                                    i++;
+                                    kvp.Add("labelsARRAYHACK" + i.ToString(), a.ToString());
+                                }
+                            }
+
+
+
                             kvp.Add("ytvidoffset", track.YoutubeStartOffset.ToString());
                             current_track_in_upload_queue = z; //does this work.. pretty weak stuff :S
                             nwc.UploadProgress += new UploadProgressDelegate(nwc_UploadProgress);
                             nwc.TimeOut = 0;
+                           
                             res = nwc.PostMultipartData(config.hostname.Replace("demovibes/", "demovibes") + "/artist/" + track.ArtistID.ToString() + "/upload/",
                                                                 kvp,
                                                                 "file",
                                                                 System.IO.File.ReadAllBytes(track.File)
                                                                 );
-                            if (!res.Contains("Preview:"))
+                            if (!res.Contains("This song has been played 0"))
                             {
                                 MessageBox.Show("Something went wrong when i tried to upload: " + track.File);
                             }
