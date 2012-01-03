@@ -35,65 +35,86 @@ namespace RadioPusher2
         public SearchForm(bool multiple,NWebClient wc, string searchurl,string initialQuery, string matchKeyOrInnerRegex, string matchValueOrOuterRegex,string nodekey,List<int> values)
         {
             InitializeComponent();
-            MultiSelectionMode = multiple;
-            nwc = wc;
-            DataGridViewTextBoxColumn keyID = new DataGridViewTextBoxColumn();
-            keyID.DataPropertyName = "mKey";
-            keyID.HeaderText = "mKey";
-            keyID.Visible = false;
-            keyID.Name = "mKey";
-            keyID.Width = 50;
+            try {
+                MultiSelectionMode = multiple;
+                nwc = wc;
+                DataGridViewTextBoxColumn keyID = new DataGridViewTextBoxColumn();
+                keyID.DataPropertyName = "mKey";
+                keyID.HeaderText = "mKey";
+                keyID.Visible = false;
+                keyID.Name = "mKey";
+                keyID.Width = 50;
 
-            DataGridViewTextBoxColumn valueID = new DataGridViewTextBoxColumn();
-            valueID.DataPropertyName = "mValue";
-            valueID.HeaderText = "mValue";
-            valueID.Visible = true;
-            valueID.Name = "mValue";
-            valueID.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-            valueID.ReadOnly = true;
-            dataGridViewSearch.Columns.Add(keyID);
-            dataGridViewSearch.Columns.Add(valueID);
+                DataGridViewTextBoxColumn valueID = new DataGridViewTextBoxColumn();
+                valueID.DataPropertyName = "mValue";
+                valueID.HeaderText = "mValue";
+                valueID.Visible = true;
+                valueID.Name = "mValue";
+                valueID.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+                valueID.ReadOnly = true;
+                dataGridViewSearch.Columns.Add(keyID);
+                dataGridViewSearch.Columns.Add(valueID);
 
 
 
-            dataGridViewSearch.CellClick += new DataGridViewCellEventHandler(dataGridViewSearch_CellClick);
+                dataGridViewSearch.CellClick += new DataGridViewCellEventHandler(dataGridViewSearch_CellClick);
 
-            SearchUrl = searchurl;
-            mKey = matchKeyOrInnerRegex;
-            mValue = matchValueOrOuterRegex;
-            query = initialQuery;
-            textBoxSearch.Text = query;
-            NodeKey = nodekey;
-            _PerformSearch();
-            if (!MultiSelectionMode) {
-                textBoxSelection.Visible = false;
-                buttonOK.Visible = false;
-            } else {
-                
-               
-                
-                if (values != null) {
-                    new Thread(delegate() {
-                        while (searchinprogress) {
-                            Thread.Sleep(300);
-                        }
-                        //we are anonymous! (refresh the grid please);
-                        BeginInvoke(new MethodInvoker(delegate() {
-                            foreach (searchDS s in ds) {
-                                int val = Int32.Parse(s.mKey.ToString());
-                                if (values.Contains(val)) {
-                                    SelectionList.Add(val);
-                                    SelectionListValues.Add(s.mValue.ToString());
-                                    textBoxSelection.Text += s.mKey.ToString() + ",";
-                                    textBoxSelectionValues.Text += s.mValue.ToString() + ",";
-                                }
-                            }
-                        }));
-
-                    }).Start();
-                   
+                SearchUrl = searchurl;
+                mKey = matchKeyOrInnerRegex;
+                mValue = matchValueOrOuterRegex;
+                query = initialQuery;
+                textBoxSearch.Text = query;
+                NodeKey = nodekey;
+                try {
+                        _PerformSearch();
+                } catch (Exception exp) {
+                    MessageBox.Show(exp.Message);
                 }
+                if (!MultiSelectionMode) {
+                    textBoxSelection.Visible = false;
+                    buttonOK.Visible = false;
+                } else {
+                    if (values != null) {
+                        
+                        new Thread(delegate() {
+                            try {
+                                Thread.Sleep(1000);
+                                while (searchinprogress) {
+                                    Thread.Sleep(300);
+                                }
+                                //we are anonymous! (refresh the grid please);
+                              
+                                    foreach (searchDS s in ds) {
+                                        int val = Int32.Parse(s.mKey.ToString());
+                                        if (values.Contains(val)) {
+                                            if (textBoxSelection.InvokeRequired) {
+                                                dataGridViewSearch.Invoke((MethodInvoker)delegate() {
+                                                    SelectionList.Add(val);
+                                                    SelectionListValues.Add(s.mValue.ToString());
+                                                    textBoxSelection.Text += s.mKey.ToString() + ",";
+                                                    textBoxSelectionValues.Text += s.mValue.ToString() + ",";
+                                                });
+                                            } else {
+                                                SelectionList.Add(val);
+                                                SelectionListValues.Add(s.mValue.ToString());
+                                                textBoxSelection.Text += s.mKey.ToString() + ",";
+                                                textBoxSelectionValues.Text += s.mValue.ToString() + ",";
+                                            }
+                                        }
+                                    }
+                                
+                            } catch (Exception exp) {
+                                MessageBox.Show(exp.Message);
+                            }
 
+                        }).Start();
+
+                    }
+
+
+                }
+            } catch (Exception exp) {                
+                MessageBox.Show(exp.Message + exp.StackTrace);
                 
             }
 
@@ -174,6 +195,7 @@ namespace RadioPusher2
 
         private void _PerformSearch()
         {
+            dataGridViewSearch.DataSource = searchds;
             ds.Clear();
             string query = textBoxSearch.Text.Trim();
             new Thread(delegate() {
@@ -231,13 +253,17 @@ namespace RadioPusher2
                             ds.Add(new searchDS(key, value));
                         }
                     }
-                    if (InvokeRequired) {
-                        //we are anonymous! (refresh the grid please);
-                        BeginInvoke(new MethodInvoker(delegate() {
+                   
+                    if (dataGridViewSearch.InvokeRequired) {
+                        dataGridViewSearch.Invoke((MethodInvoker)delegate() {
                             dataGridViewSearch.DataSource = ds;
                             dataGridViewSearch.Refresh();
-                        }));
+                        });
+                    } else {
+                        dataGridViewSearch.DataSource = ds;
+                        dataGridViewSearch.Refresh();
                     }
+                    
                     searchinprogress = false;
                 } catch { searchinprogress = false; }
             }).Start();

@@ -248,7 +248,7 @@ namespace Utils
 		}
 
 
-        public string PostMultipartData(string target, Dictionary<string, string> dict, string streamfieldname, byte[] FileData) {
+        public string PostMultipartData(string target, Dictionary<string, string> dict, string streamfieldname, byte[] FileData,string filename) {
             try {
                 f_HttpWebRequest = (HttpWebRequest)HttpWebRequest.Create(target);
                 if (!autoredir) {
@@ -314,8 +314,8 @@ namespace Utils
                 }
 
                 contents.Append(header);
-                contents.Append("Content-Disposition: form-data; name=\""+streamfieldname+"\"; filename=\""+streamfieldname+".jpg\"" + System.Environment.NewLine);
-                contents.Append("Content-Type: image/jpeg" + System.Environment.NewLine);
+                contents.Append("Content-Disposition: form-data; name=\""+streamfieldname+"\"; filename=\""+filename+"\"" + System.Environment.NewLine);
+                contents.Append("Content-Type: audio/mpeg" + System.Environment.NewLine);
                 contents.Append(System.Environment.NewLine);
 
                 byte[] BodyBytes = Encoding.UTF8.GetBytes(contents.ToString());

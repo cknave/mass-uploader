@@ -86,25 +86,25 @@ namespace RadioPusher2
                     dataGridViewTracks.Rows[hti.RowIndex].Selected = true;
                     if (e.Button == MouseButtons.Right)
                     {
-                        if (hti.ColumnIndex == 1)
-                        { //artist row clicked
-                            if (ds[hti.RowIndex].ArtistID == 0){
-                                SearchForm sf = new SearchForm(false,nwc,String.Format("{0}search/ajax/artist/?q=", config.hostname.Replace("/demovibes/", "/")), ds[hti.RowIndex].ID3Artist, "id", "handle", "artists",null);
-                                sf.ShowDialog(); 
-                                try
-                                {
-                                    ds[hti.RowIndex].ArtistID = Int32.Parse(sf.ResultKey);
-                                }
-                                catch
-                                {
-                                    ds[hti.RowIndex].ArtistID = 0;
-                                }
-                            }
-                            else
-                            {
-                                contextMenuStripArtistSearch.Show(new Point(MousePosition.X, MousePosition.Y));
-                            }
-                        }
+                    //    //if (hti.ColumnIndex == 1)
+                    //    //{ //artist row clicked
+                    //    //    if (ds[hti.RowIndex].ArtistID == 0){
+                    //    //        SearchForm sf = new SearchForm(false,nwc,String.Format("{0}search/ajax/artist/?q=", config.hostname.Replace("/demovibes/", "/")), ds[hti.RowIndex].ID3Artist, "id", "handle", "artists",null);
+                    //    //        sf.ShowDialog(); 
+                    //    //        try
+                    //    //        {
+                    //    //            ds[hti.RowIndex].ArtistID = Int32.Parse(sf.ResultKey);
+                    //    //        }
+                    //    //        catch
+                    //    //        {
+                    //    //            ds[hti.RowIndex].ArtistID = 0;
+                    //    //        }
+                    //    //    }
+                    //    //    else
+                    //    //    {
+                    //    //        contextMenuStripArtistSearch.Show(new Point(MousePosition.X, MousePosition.Y));
+                    //    //    }
+                    //    }
 
                         if (hti.ColumnIndex > 0 && hti.ColumnIndex != 8 && hti.ColumnIndex != 14 && hti.ColumnIndex != 7)
                         {
@@ -124,9 +124,10 @@ namespace RadioPusher2
                         }
                         if (hti.ColumnIndex == 1){ //artist row clicked
                             if (ds[hti.RowIndex].ArtistID == 0){
+                                try {
+
                                 SearchForm sf = new SearchForm(false,nwc,String.Format("{0}search/ajax/artist/?q=", config.hostname.Replace("/demovibes/", "/")), ds[hti.RowIndex].ID3Artist, "id", "handle", "artists",null);
                                     sf.ShowDialog();
-                                try{
                                     ds[hti.RowIndex].ArtistID = Int32.Parse(sf.ResultKey);
                                 }catch{
                                     ds[hti.RowIndex].ArtistID = 0;
@@ -757,8 +758,7 @@ namespace RadioPusher2
                                 }
                             }
 
-
-
+                            
                             kvp.Add("ytvidoffset", track.YoutubeStartOffset.ToString());
                             current_track_in_upload_queue = z; //does this work.. pretty weak stuff :S
                             nwc.UploadProgress += new UploadProgressDelegate(nwc_UploadProgress);
@@ -767,7 +767,8 @@ namespace RadioPusher2
                             res = nwc.PostMultipartData(config.hostname.Replace("demovibes/", "demovibes") + "/artist/" + track.ArtistID.ToString() + "/upload/",
                                                                 kvp,
                                                                 "file",
-                                                                System.IO.File.ReadAllBytes(track.File)
+                                                                System.IO.File.ReadAllBytes(track.File),
+                                                                Path.GetFileName(track.File)
                                                                 );
                             if (!res.Contains("This song has been played 0"))
                             {
